@@ -1,0 +1,220 @@
+import { Box, Package } from "lucide-react";
+import { calculateAmountExVat } from "../../../utils/vatHelpers";
+import { round2 } from "../../../utils/Round2";
+
+interface ServiceItem {
+  id?: string | number;
+  image?: string;
+  name: string;
+  retail_price_excl_vat: number;
+  subtotal_excl_vat: number;
+  subtotal_incl_vat: number;
+  unit_price_incl_vat: number,
+  vat_amount: number;
+  quantity: number;
+  subtotal: number;
+}
+
+interface ServiceItemTableProps {
+  data: ServiceItem[];
+  vatRate?: number;
+  setTotalItemsCost: any;
+}
+
+const ServiceItemTable = ({ data, setTotalItemsCost }: ServiceItemTableProps) => {
+  const hasData = data && data.length > 0;
+
+  const getTotals = () => {
+    if (!hasData) return { subtotal: 0, vat: 0, total: 0 };
+
+    const subtotalInclVAT = round2(data.reduce((sum, item) => sum + item.subtotal_incl_vat, 0));
+    const subtotal = calculateAmountExVat(subtotalInclVAT);
+    // const vat = calculateVatAmount(subtotalInclVAT);
+
+    setTotalItemsCost(calculateAmountExVat(subtotalInclVAT));
+
+    return { subtotal, subtotalInclVAT };
+  };
+
+  const totals = getTotals();
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-full">
+          {!hasData && (
+            <caption className="py-8 text-center">
+              <Box className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">No service item</p>
+              <p className="text-gray-400 text-sm mt-1">No item added to this invoice</p>
+            </caption>
+          )}
+
+          {hasData && (
+            <>
+              <thead>
+                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                  <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">
+                    #
+                  </th>
+                  <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">
+                    Image
+                  </th>
+                  <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      Item Name
+                    </div>
+                  </th>
+                  <th className="px-4 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Unit Price
+                  </th>
+                  <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Qty
+                  </th>
+                  <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Amount (Excl. VAT)
+                  </th>
+                  <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    VAT (5%)
+                  </th>
+                  <th className="px-4 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Amount (Incl. VAT)
+                  </th>
+
+                  {/* <th className="px-4 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    VAT ({vatRate}%)
+                  </th>
+                  <th className="px-4 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Total
+                  </th> */}
+                </tr>
+              </thead>
+
+              <tbody>
+                {data.map((item, idx) => (
+                  <tr
+                    key={item.id || idx}
+                    className="border-b border-gray-100 hover:bg-blue-50/30 transition-all duration-150"
+                  >
+                    <td className="px-4 py-4 text-center">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                        <span className="text-xs font-semibold text-blue-600">{idx + 1}</span>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                        {item.image ? (
+                          <img
+                            src={`file://${item.image}`}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package className="w-6 h-6 text-gray-400" />
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <span className="font-medium text-gray-900">{item.name}</span>
+                    </td>
+
+                    <td className="px-4 py-4 text-right">
+                      <span className="text-sm text-gray-700 font-medium">
+                        {calculateAmountExVat(item.unit_price_incl_vat)} AED
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4 text-center">
+                      {/* <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-md bg-gray-100 text-sm font-semibold text-gray-900"> */}
+                      <span className="text-sm text-gray-700 font-medium">{item.quantity}</span>
+                    </td>
+
+                    <td className="px-4 py-4 text-center">
+                      <span className="text-sm text-gray-700 font-medium">
+                        {/* <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-md bg-gray-100 text-sm font-semibold text-gray-900"> */}
+                        {item.subtotal_excl_vat}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4 text-center">
+                      {/* <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-md bg-gray-100 text-sm font-semibold text-gray-900"> */}
+                      <span className="text-sm text-gray-700 font-medium">{item.vat_amount}</span>
+                    </td>
+
+                    <td className="px-4 py-4 text-right">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {item.subtotal_incl_vat} AED
+                      </span>
+                    </td>
+
+                    {/* <td className="px-4 py-4 text-right">
+                      <span className="text-sm text-green-600 font-medium">
+                        +{calculateVAT(item.subtotal)} AED
+                      </span>
+                    </td>
+                    
+                    <td className="px-4 py-4 text-right">
+                      <span className="text-sm font-bold text-gray-900">
+                        {calculateTotal(item.subtotal)} AED
+                      </span>
+                    </td> */}
+                  </tr>
+                ))}
+              </tbody>
+
+              <tfoot>
+                <tr className="bg-gradient-to-r from-blue-50 to-blue-100 border-t-2 border-blue-200">
+                  {/* <td className="px-4 py-4 text-right" colSpan={7}>
+                    <span className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Items Totals
+                    </span>
+                  </td> */}
+                  <td colSpan={6}></td>
+                  <td className="px-4 py-4 text-center">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Subtotal (excl. VAT)</span>
+                      <span className="text-base font-bold text-gray-900">
+                        {totals.subtotal.toFixed(2)} AED
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Subtotal (incl. VAT)</span>
+                      <span className="text-base font-bold text-gray-900">
+                        {totals?.subtotalInclVAT?.toFixed(2)} AED
+                      </span>
+                    </div>
+                  </td>
+                  {/* <td className="px-4 py-4 text-right">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">VAT ({vatRate}%)</span>
+                      <span className="text-base font-bold text-green-600">
+                        +{totals.vat.toFixed(2)} AED
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Grand Total</span>
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-lg font-bold text-blue-600">
+                          {totals.total.toFixed(2)} AED
+                        </span>
+                      </div>
+                    </div>
+                  </td> */}
+                </tr>
+              </tfoot>
+            </>
+          )}
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default ServiceItemTable;

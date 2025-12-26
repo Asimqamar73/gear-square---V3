@@ -1,0 +1,23 @@
+{
+  "appId": "com.n-ziermann.electron-app",
+  "files": ["dist-electron", "dist-react"],
+  "icon": "./ghost-custom.png",
+  "extraResources": [
+    "dist-electron/electron/preload.cjs",
+  {
+      "from": "dist-electron/assets/db/gear-square.db",
+      "to": "db/gear-square.db"
+    }
+  ],
+  "mac": {
+    "target": "dmg"
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility"
+  },
+  "win": {
+    "target": ["portable", "msi"]
+  },
+  "asarUnpack": ["dist/assets/db/gear-square.db"]
+}

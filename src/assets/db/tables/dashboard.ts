@@ -1,0 +1,355 @@
+import db from "../db.js";
+
+export const dailyProfit = (): Promise<{ total_profit: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+      FROM services
+      JOIN service_items 
+        ON services.id = service_items.service_id
+      JOIN products 
+        ON products.id = service_items.product_id
+      WHERE DATE(services.created_at) = DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_profit: number }) => {
+      if (err) {
+        console.error("Error fetching daily profit:", err);
+        return reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+export const last7DaysProfit = (): Promise<{ total_profit: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+      FROM services
+      JOIN service_items 
+        ON services.id = service_items.service_id
+      JOIN products 
+        ON products.id = service_items.product_id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-7 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_profit: number }) => {
+      if (err) {
+        console.error("Error fetching last 7 days profit:", err);
+        return reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+export const dailyDueAmount = (): Promise<{ total_due_amount: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM(service_bill.amount_due), 0), 2) AS total_due_amount
+      FROM services
+      JOIN service_bill 
+        ON service_bill.service_id = services.id
+      WHERE DATE(services.created_at) = DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_due_amount: number }) => {
+      if (err) {
+        console.error("Error fetching daily due amount:", err);
+        return reject(err);
+      }
+
+      resolve(row);
+    });
+  });
+};
+
+export const last7DaysDueAmount = (): Promise<{ total_due_amount: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM(service_bill.amount_due), 0), 2) AS total_due_amount
+      FROM services
+      JOIN service_bill 
+        ON service_bill.service_id = services.id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-7 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_due_amount: number }) => {
+      if (err) {
+        console.error("Error fetching last 7 days due amount:", err);
+        return reject(err);
+      }
+
+      resolve(row);
+    });
+  });
+};
+
+export const todayServicesCount = () => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT count(*) as services_count FROM services
+      WHERE DATE(services.created_at) = DATE('now', 'localtime')`,
+      [],
+      (err: any, row: any) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+};
+
+export const last7DaysServicesCount = () => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT count(*) as services_count FROM services
+        WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-7 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')`,
+      [],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+};
+
+export const last30DaysProfit = (): Promise<{ total_profit: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+      FROM services
+      JOIN service_items 
+        ON services.id = service_items.service_id
+      JOIN products 
+        ON products.id = service_items.product_id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-30 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_profit: number }) => {
+      if (err) {
+        console.error("Error fetching last 30 days profit:", err);
+        return reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+export const last30DaysServicesCount = () => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT count(*) as services_count FROM services
+        WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-30 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')`,
+      [],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+};
+
+export const last30DaysDueAmount = (): Promise<{ total_due_amount: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM(service_bill.amount_due), 0), 2) AS total_due_amount
+      FROM services
+      JOIN service_bill 
+        ON service_bill.service_id = services.id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-30 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_due_amount: number }) => {
+      if (err) {
+        console.error("Error fetching last 30 days due amount:", err);
+        return reject(err);
+      }
+
+      resolve(row);
+    });
+  });
+};
+
+export const last365DaysProfit = (): Promise<{ total_profit: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+      FROM services
+      JOIN service_items 
+        ON services.id = service_items.service_id
+      JOIN products 
+        ON products.id = service_items.product_id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_profit: number }) => {
+      if (err) {
+        console.error("Error fetching last 365 days profit:", err);
+        return reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+export const last365DaysServicesCount = () => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT count(*) as services_count FROM services
+        WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')`,
+      [],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+};
+
+export const last365DaysDueAmount = (): Promise<{ total_due_amount: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM(service_bill.amount_due), 0), 2) AS total_due_amount
+      FROM services
+      JOIN service_bill 
+        ON service_bill.service_id = services.id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_due_amount: number }) => {
+      if (err) {
+        console.error("Error fetching last 365 days due amount:", err);
+        return reject(err);
+      }
+
+      resolve(row);
+    });
+  });
+};
+
+export const timelineSummary = (
+  timeline: { startDate: string; endDate: string }
+): Promise<{
+  services_count: number;
+  total_due_amount: number;
+  total_profit: number;
+}> => {
+  return new Promise((resolve, reject) => {
+
+    const parseDDMMYYYY = (dateStr: string): Date => {
+      const [day, month, year] = dateStr.split("/").map(Number);
+      return new Date(year, month - 1, day);
+    };
+
+    const start = parseDDMMYYYY(timeline.startDate);
+    const end = parseDDMMYYYY(timeline.endDate);
+
+    const fromDate = start <= end ? start : end;
+    const toDate = start <= end ? end : start;
+
+    // Start of day & end of day
+    const from = `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(2, "0")}-${String(fromDate.getDate()).padStart(2, "0")} 00:00:00`;
+    const to = `${toDate.getFullYear()}-${String(toDate.getMonth() + 1).padStart(2, "0")}-${String(toDate.getDate()).padStart(2, "0")} 23:59:59`;
+
+    const query = `
+      WITH
+        service_data AS (
+          SELECT COUNT(id) AS services_count
+          FROM services
+          WHERE DATETIME(created_at) BETWEEN DATETIME(?) AND DATETIME(?)
+        ),
+        due_data AS (
+          SELECT ROUND(COALESCE(SUM(amount_due), 0), 2) AS total_due_amount
+          FROM service_bill
+          WHERE service_id IN (
+            SELECT id FROM services
+            WHERE DATETIME(created_at) BETWEEN DATETIME(?) AND DATETIME(?)
+          )
+        ),
+        profit_data AS (
+          SELECT ROUND(
+            COALESCE(SUM((p.retail_price_inclusive_vat - p.cost_price) * si.quantity), 0),
+            2
+          ) AS total_profit
+          FROM service_items si
+          JOIN products p ON p.id = si.product_id
+          JOIN services s ON s.id = si.service_id
+          WHERE DATETIME(s.created_at) BETWEEN DATETIME(?) AND DATETIME(?)
+        )
+      SELECT
+        (SELECT services_count FROM service_data) AS services_count,
+        (SELECT total_due_amount FROM due_data) AS total_due_amount,
+        (SELECT total_profit FROM profit_data) AS total_profit;
+    `;
+
+    db.get(
+      query,
+      [from, to, from, to, from, to],
+      (err, row) => {
+        if (err) {
+          console.error("Error fetching timeline summary:", err);
+          return reject(err);
+        }
+        //@ts-ignore
+        resolve(row);
+      }
+    );
+  });
+};
+
+
+export const timelineServicesCount = () => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT count(*) as services_count FROM services
+        WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')`,
+      [],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+};
+
+export const timelineDueAmount = (): Promise<{ total_due_amount: number }> => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        ROUND(COALESCE(SUM(service_bill.amount_due), 0), 2) AS total_due_amount
+      FROM services
+      JOIN service_bill 
+        ON service_bill.service_id = services.id
+      WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
+        AND DATE(services.created_at) < DATE('now', 'localtime')
+    `;
+
+    db.get(query, [], (err: Error | null, row: { total_due_amount: number }) => {
+      if (err) {
+        console.error("Error fetching last 365 days due amount:", err);
+        return reject(err);
+      }
+
+      resolve(row);
+    });
+  });
+};

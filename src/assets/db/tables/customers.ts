@@ -1,0 +1,182 @@
+import db from "../db.js";
+import { create_customers_triggers } from "../triggers/triggers.js";
+
+export const create_customers_table = () => {
+  db.serialize(() => {
+    // Create table
+    db.run(
+      `CREATE TABLE IF NOT EXISTS customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      phone_number TEXT,
+      company_name TEXT,
+      company_phone_number TEXT,
+      email TEXT,
+      address TEXT,
+      trn TEXT,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      created_by INTEGER,
+      updated_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_by INTEGER,
+      deleted_at TEXT,
+      FOREIGN KEY(created_by) REFERENCES users(id),
+      FOREIGN KEY(updated_by) REFERENCES users(id)
+    )`,
+      (err: any) => {
+        if (err) console.error("Error creating customers table:", err.message);
+        else console.log("Customers table created or already exists.");
+      }
+    );
+
+    // Create indexes for fast lookups
+    db.run(`CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone_number)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_customers_company ON customers(company_name)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_customers_company_phone ON customers(company_phone_number)`);
+  });
+    create_customers_triggers();
+  
+};
+
+export function addCustomerToDB({
+  name,
+  phoneNumber,
+  companyName,
+  companyPhoneNumber,
+  email,
+  address,
+  trn,
+  createdBy,
+  updatedBy,
+}: {
+  name: string;
+  phoneNumber: string;
+  companyName: string;
+  companyPhoneNumber: string;
+  email: string;
+  trn: string;
+  address: string;
+  createdBy: number;
+  updatedBy: number;
+}) {
+  return new Promise((res, rej) => {
+    const query = `INSERT INTO customers (name, phone_number, company_name, company_phone_number, email, address, trn, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`;
+    //@ts-ignore\
+    db.run(
+      query,
+      [name, phoneNumber, companyName, companyPhoneNumber, email, address, trn, createdBy, updatedBy],
+      function (err: any) {
+        if (err) return rej(err);
+        //@ts-ignore
+        res(this.lastID);
+      }
+    );
+  });
+}
+
+export function getAllCustomers(limit?: number, offset?: number) {
+  return new Promise((resolve, reject) => {
+    const dataQuery = `
+      SELECT *
+      FROM customers
+      ORDER BY created_at DESC
+      ${limit ? `LIMIT ${limit} OFFSET ${offset || 0}` : ""}
+    `;
+
+    const countQuery = `SELECT COUNT(*) AS total FROM customers`;
+
+    db.all(dataQuery, [], (err: any, rows: any) => {
+      if (err) return reject(err);
+
+      db.get(countQuery, [], (err2: any, countRow: any) => {
+        if (err2) return reject(err2);
+
+        resolve({
+          data: rows,
+          total: countRow.total,
+        });
+      });
+    });
+  });
+}
+
+
+export function searchCustomerByPhoneNumber(phoneNumber: number) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM customers WHERE phone_number = ? OR company_phone_number = ?",
+      [phoneNumber, phoneNumber],
+      (err: any, row: any) => {
+        if (err) return reject(err);
+        resolve(row);
+      }
+    );
+  });
+}
+
+export function getCustomerById(id: number) {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT * FROM customers WHERE id = ? ", [id], (err: any, row: any) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+
+export function deleteCustomerById(id: number) {
+  return new Promise((resolve, reject) => {
+    db.get("DELETE FROM customers WHERE id = ? ", [id], (err: any, row: any) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+
+export function updateCustomerDetailsById({
+  name,
+  email,
+  phone_number,
+  company_name,
+  company_phone_number,
+  address,
+  trn,
+  updated_by,
+  id,
+}: {
+  name: string;
+  email: string;
+  phone_number: number;
+  company_name: string;
+  company_phone_number: string;
+  address: string;
+  trn: string;
+  updated_by: number;
+  id: number;
+}) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      UPDATE customers
+      SET
+        name = ?,
+        email = ?,
+        phone_number = ?,
+        company_name = ?,
+        company_phone_number = ?,
+        address = ?,
+        trn = ?,
+        updated_by = ?
+      WHERE id = ?;
+    `;
+    db.run(
+      query,
+      [name, email, phone_number, company_name, company_phone_number, address, trn, updated_by, id],
+      function (err: any) {
+        if (err) {
+          return reject(err);
+        }
+        //@ts-ignore
+        resolve(this.changes);
+      }
+    );
+  });
+}
