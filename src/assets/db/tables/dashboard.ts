@@ -4,7 +4,7 @@ export const dailyProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
@@ -27,7 +27,7 @@ export const last7DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
@@ -125,7 +125,7 @@ export const last30DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
@@ -187,7 +187,7 @@ export const last365DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_inclusive_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
@@ -286,7 +286,7 @@ export const timelineSummary = (
         ),
         profit_data AS (
           SELECT ROUND(
-            COALESCE(SUM((p.retail_price_inclusive_vat - p.cost_price) * si.quantity), 0),
+            COALESCE(SUM((p.retail_price_incl_vat - p.cost_price) * si.quantity), 0),
             2
           ) AS total_profit
           FROM service_items si
