@@ -11,6 +11,7 @@ export const create_service_items_table = () => {
     
     quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity > 0),
     unit_price_incl_vat DECIMAL(12, 2) NOT NULL CHECK(unit_price_incl_vat >= 0),
+    cost_price_at_sale DECIMAL(12, 2) NOT NULL CHECK(unit_price_incl_vat >= 0),
 
     subtotal_excl_vat DECIMAL(12, 2) NOT NULL CHECK(subtotal_excl_vat >= 0),
     vat_amount DECIMAL(12, 2) NOT NULL CHECK(vat_amount >= 0),
@@ -109,7 +110,7 @@ export function updateServiceByServiceId(data: {
       // 1b. Insert new items (updated with VAT fields)
       if (items_changes.added.length > 0) {
         const insertItemStmt = db.prepare(
-          "INSERT INTO service_items (product_id, service_id, quantity, subtotal_excl_vat, subtotal_incl_vat, vat_amount, unit_price_incl_vat) VALUES (?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO service_items (product_id, service_id, quantity, subtotal_excl_vat, subtotal_incl_vat, vat_amount, unit_price_incl_vat, cost_price_at_sale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
         for (const item of items_changes.added) {
           insertItemStmt.run(
@@ -119,7 +120,8 @@ export function updateServiceByServiceId(data: {
             item.subtotal || 0,
             item.inclVatTotal || 0,
             item.itemVatTotal || 0,
-            item.unitPriceInclVAT || 0
+            item.unitPriceInclVAT || 0,
+            item.costPrice || 0
           );
         }
         insertItemStmt.finalize((err: any) => {
@@ -133,7 +135,7 @@ export function updateServiceByServiceId(data: {
       // 1c. Update existing items (updated with VAT fields)
       if (items_changes.updated.length > 0) {
         const updateItemStmt = db.prepare(
-          "UPDATE service_items SET product_id = ?, quantity = ?, subtotal_excl_vat = ?, subtotal_incl_vat = ?, vat_amount = ?, unit_price_incl_vat = ? WHERE id = ?"
+          "UPDATE service_items SET product_id = ?, quantity = ?, subtotal_excl_vat = ?, subtotal_incl_vat = ?, vat_amount = ?, unit_price_incl_vat = ?, cost_price_at_sale = ? WHERE id = ?"
         );
         for (const item of items_changes.updated) {
           updateItemStmt.run(
@@ -143,6 +145,7 @@ export function updateServiceByServiceId(data: {
             item.inclVatTotal || 0,
             item.itemVatTotal || 0,
             item.unitPriceInclVAT || 0,
+            item.costPrice || 0,
             item.id
           );
         }

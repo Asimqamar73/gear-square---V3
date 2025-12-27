@@ -29,6 +29,7 @@ interface IItems {
   itemVatTotal: number;
   id?: number;
   unitPriceInclVAT: number;
+  costPrice: number;
 }
 
 interface LaborItem {
@@ -72,6 +73,7 @@ export const EditCustomerInvoice = () => {
     inclVatTotal: 0,
     itemVatTotal: 0,
     unitPriceInclVAT: 0,
+    costPrice: 0,
   };
 
   const [products, setProducts] = useState([]);
@@ -178,23 +180,15 @@ export const EditCustomerInvoice = () => {
       setOriginalItems(JSON.parse(JSON.stringify(f_items)));
       setOriginalLaborItems(JSON.parse(JSON.stringify(laborItemsList)));
       // Calculate payment status
-      const totals = calculateTotalsHelper(
-        productSubtotal,
-        productVat,
-        totalLaborCostInclVat,
-        laborItemsVAT,
-        resp.serviceBill.discount,
-        resp.serviceBill.amount_paid
-      );
-
-      const paidAmount = Number(resp.serviceBill.amount_paid) || 0;
-      if (paidAmount === 0) {
-        setPaymentStatus(0);
-      } else if (paidAmount < totals.total) {
-        setPaymentStatus(1);
-      } else {
-        setPaymentStatus(2);
-      }
+      // const totals = calculateTotalsHelper(
+      //   productSubtotal,
+      //   productVat,
+      //   totalLaborCostInclVat,
+      //   laborItemsVAT,
+      //   resp.serviceBill.discount,
+      //   resp.serviceBill.amount_paid
+      // );
+      setPaymentStatus(resp.serviceBill.bill_status);
     } catch (error) {
       toast.error("Failed to load invoice details. Please try again.", {
         position: "top-center",
@@ -202,6 +196,20 @@ export const EditCustomerInvoice = () => {
       navigate("/invoices");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updatePaymentStatus = (data: any, total: number) => {
+    console.log(data);
+    console.log(total);
+    const paidAmount = Number(data) || 0;
+    console.log(paidAmount < Number(total));
+    if (paidAmount === 0) {
+      return 0;
+    } else if (paidAmount < Number(total)) {
+      return 1;
+    } else {
+      return 2;
     }
   };
 
@@ -230,6 +238,8 @@ export const EditCustomerInvoice = () => {
       laborItems.reduce((prev, curr) => prev + Number(curr.inclVatTotal), 0)
     );
     const laborCostExclVat = calculateAmountExVat(laborCostInclVat);
+    console.log("productSubtotal", productSubtotal);
+    console.log("productVat", productVat);
     const subtotal = productSubtotal + laborCostExclVat;
     const vatTotal = productVat + laborVat;
     const afterVat = subtotal + vatTotal;
@@ -281,6 +291,7 @@ export const EditCustomerInvoice = () => {
       inclVatTotal,
       itemVatTotal,
       unitPriceInclVAT: prod?.retail_price_incl_vat,
+      costPrice: prod?.cost_price,
     };
 
     const total = round2(updatedItem.reduce((prev, curr) => prev + curr.inclVatTotal, 0));
@@ -288,6 +299,10 @@ export const EditCustomerInvoice = () => {
     setTotalBill(calculateAmountExVat(total));
     setTotalVat(calculateVatAmount(total));
     setItems(updatedItem);
+    const currentTotals = calculateTotals();
+    const newTotal = inclVatTotal + currentTotals.total;
+
+    setPaymentStatus(updatePaymentStatus(totals.validPaidAmount, newTotal));
   };
 
   const handleQuantityChange = (event: any, idx: number) => {
@@ -315,6 +330,10 @@ export const EditCustomerInvoice = () => {
     setTotalBill(calculateAmountExVat(total));
     setTotalVat(calculateVatAmount(total));
     setItems(updatedItem);
+    const currentTotals = calculateTotals();
+    const newTotal = inclVatTotal + currentTotals.total;
+
+    setPaymentStatus(updatePaymentStatus(totals.validPaidAmount, newTotal));
   };
 
   const deleteItem = (idx: number) => {
@@ -341,6 +360,7 @@ export const EditCustomerInvoice = () => {
 
     setLaborCost(calculateAmountExVat(totalLabourAmount));
     setLaborItemsTotalVat(calculateVatAmount(totalLabourAmount));
+    setPaymentStatus(updatePaymentStatus(totals.validPaidAmount, totals.total - totalLabourAmount));
   };
 
   const handleAmountPaid = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,6 +433,7 @@ export const EditCustomerInvoice = () => {
           inclVatTotal: item.inclVatTotal,
           itemVatTotal: item.itemVatTotal,
           unitPriceInclVAT: item.unitPriceInclVAT,
+          costPrice: item.costPrice,
         });
       } else {
         const original = originalItems.find((orig: any) => orig.id === item.id);
@@ -431,6 +452,7 @@ export const EditCustomerInvoice = () => {
               inclVatTotal: item.inclVatTotal,
               itemVatTotal: item.itemVatTotal,
               unitPriceInclVAT: item.unitPriceInclVAT,
+              costPrice: item.costPrice,
             });
           }
         }
@@ -510,7 +532,7 @@ export const EditCustomerInvoice = () => {
       const itemChanges = detectItemChanges();
       const laborChanges = detectLaborChanges();
       const totals = calculateTotals();
-    
+
       // @ts-ignore
       const response = await window.electron.updateInvoice({
         service_id: params.invoiceId,
@@ -526,7 +548,7 @@ export const EditCustomerInvoice = () => {
         amount_paid: totals.validPaidAmount,
         labor_cost: calculateRetailExVat(Number(laborCost)),
         service_note: serviceNote,
-        payment_status: paymentStatus,
+        payment_status: updatePaymentStatus(totals.validPaidAmount, totals.total),
         //@ts-ignore
         updated_by: JSON.parse(localStorage.getItem("gear-square-user")).id,
       });
@@ -696,95 +718,6 @@ export const EditCustomerInvoice = () => {
             setLaborItemsTotalVat={setLaborItemsTotalVat}
           />
         </div>
-
-        {/* <div className="flex justify-end mt-6">
-          <div className="w-full max-w-md bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <div className="flex items-center justify-between gap-2 mb-5 pb-4 border-b border-gray-100">
-              <h2 className="text-base font-semibold text-gray-900">Invoice Summary</h2>
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${paymentStatuses[paymentStatus].color}`}
-              >
-                {getStatusDot(paymentStatus)}
-                {paymentStatuses[paymentStatus].label}
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Products Subtotal</span>
-                <span className="font-medium text-gray-900">{totalBill.toFixed(2)} AED</span>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600 font-medium">Labor Cost</span>
-                <span className="font-medium text-gray-900">
-                  {calculateRetailExVat(Number(laborCost)).toFixed(2)} AED
-                </span>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">VAT (5%)</span>
-                <span className="font-medium text-gray-900">{totals.vatTotal.toFixed(2)} AED</span>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">After VAT</span>
-                <span className="font-medium text-gray-900">{totals.afterVat.toFixed(2)} AED</span>
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="discount"
-                  className="text-sm font-medium text-gray-700 flex justify-between"
-                >
-                  <span>Discount</span>
-                </label>
-                <input
-                  type="text"
-                  id="discount"
-                  value={discount}
-                  onChange={handleDiscountChange}
-                  placeholder="0"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="amountPaid" className="text-sm font-medium text-gray-700">
-                  Amount Paid
-                </label>
-                <input
-                  type="text"
-                  id="amountPaid"
-                  value={amountPaid}
-                  onChange={handleAmountPaid}
-                  placeholder="0"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-gray-500 space-y-2">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-900">Total</span>
-                  <span className="text-xl font-bold text-gray-900">
-                    {totals.total.toFixed(2)} AED
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Remaining Balance</span>
-                  <span
-                    className={`font-semibold ${
-                      totals.remaining > 0 ? "text-red-600" : "text-green-600"
-                    }`}
-                  >
-                    {totals.remaining.toFixed(2)} AED
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
         <div className="flex justify-end mt-8">
           <div className="w-full max-w-md bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <div className="flex items-center justify-between gap-2 mb-5 pb-4 border-b border-gray-100">

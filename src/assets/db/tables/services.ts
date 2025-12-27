@@ -302,14 +302,14 @@ export function generateInvoice(
           // 2️⃣ Insert Service Items and calculate items subtotal
           let itemsSubtotal = 0;
           const insertItemQuery = `
-            INSERT INTO service_items (product_id, service_id, quantity, subtotal_excl_vat, subtotal_incl_vat, vat_amount, unit_price_incl_vat)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO service_items (product_id, service_id, quantity, subtotal_excl_vat, subtotal_incl_vat, vat_amount, unit_price_incl_vat, cost_price_at_sale)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `;
           const stmt = db.prepare(insertItemQuery);
 
           for (const item of items) {
             itemsSubtotal += item.subtotal;
-            stmt.run([item.product.id, service_id, item.quantity, item.subtotal, item.inclVatTotal, item.itemVatTotal,item.unitPriceInclVAT]);
+            stmt.run([item.product.id, service_id, item.quantity, item.subtotal, item.inclVatTotal, item.itemVatTotal, item.unitPriceInclVAT, item.costPrice]);
           }
 
           stmt.finalize((err2: any) => {
@@ -346,7 +346,7 @@ export function generateInvoice(
                 // const totalBeforeDiscount = Number(billSubtotal) + Number(vatAmount);
                 // const discountAmount = discountPercent ? discountPercent : 0;
                 // const total = totalBeforeDiscount - discountAmount;
-                console.log(billStatus,"billStatus")
+                // console.log(billStatus,"billStatus")
                 // 5️⃣ Insert Service Bill
                 const insertBillQuery = `
                   INSERT INTO service_bill

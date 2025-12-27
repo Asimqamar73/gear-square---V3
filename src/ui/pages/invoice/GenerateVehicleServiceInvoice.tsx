@@ -28,6 +28,7 @@ interface InvoiceItem {
   inclVatTotal: number;
   itemVatTotal: number;
   unitPriceInclVAT: number;
+  costPrice: number;
 }
 interface LaborItem {
   title: string;
@@ -65,6 +66,7 @@ export const GenerateVehicleServiceInvoice = () => {
     inclVatTotal: 0,
     itemVatTotal: 0,
     unitPriceInclVAT: 0,
+    costPrice: 0,
   };
 
   const [products, setProducts] = useState([]);
@@ -131,6 +133,7 @@ export const GenerateVehicleServiceInvoice = () => {
       inclVatTotal: totalInclVAT,
       itemVatTotal,
       unitPriceInclVAT: prod?.retail_price_incl_vat,
+      costPrice: prod?.cost_price,
     };
     const total = round2(updatedItem.reduce((prev, curr) => prev + curr.inclVatTotal, 0));
 
@@ -168,7 +171,7 @@ export const GenerateVehicleServiceInvoice = () => {
 
   const deleteItem = (idx: number) => {
     const filteredItems = items.filter((_, itemIdx) => itemIdx !== idx);
-     const total = round2(filteredItems.reduce((prev, curr) => prev + curr.inclVatTotal, 0));
+    const total = round2(filteredItems.reduce((prev, curr) => prev + curr.inclVatTotal, 0));
     setTotalBill(calculateAmountExVat(total));
     setTotalVat(calculateVatAmount(total));
     setItems(filteredItems);
@@ -239,7 +242,7 @@ export const GenerateVehicleServiceInvoice = () => {
       //@ts-ignore
       const userId = JSON.parse(localStorage.getItem("gear-square-user")).id;
       const totals = calculateTotals();
-
+      console.log("Items ==>", items);
       // @ts-ignore
       const response = await window.electron.generateInvoice({
         items,
@@ -338,10 +341,9 @@ export const GenerateVehicleServiceInvoice = () => {
     setLaborItems(filtered);
 
     // Recalculate labor cost and VAT after deletion
-    const totalLabourAmount = round2(filtered.reduce(
-      (acc, item) => acc + (Number(item.inclVatTotal) || 0),
-      0
-    ))
+    const totalLabourAmount = round2(
+      filtered.reduce((acc, item) => acc + (Number(item.inclVatTotal) || 0), 0)
+    );
     setLaborCost(calculateAmountExVat(totalLabourAmount));
     setLaborItemsTotalVat(calculateVatAmount(totalLabourAmount));
   };
