@@ -12,6 +12,7 @@ import {
   Loader2
 } from "lucide-react";
 import ProductMediaBox from "./components/ProductMediaBox";
+import { round2 } from "../../utils/Round2";
 
 interface ProductData {
   id: number | null;
@@ -25,6 +26,9 @@ interface ProductData {
   quantity: string;
   image: string;
 }
+
+
+
 
 const EditProduct = () => {
   const navigate = useNavigate();
@@ -55,6 +59,7 @@ const EditProduct = () => {
     try {
       //@ts-ignore
       const response = await window.electron.getProductById(params.productId);
+      console.log(response)
       setProduct(response);
     } catch (error) {
       toast.error("Failed to load product details. Please try again.", {
@@ -65,7 +70,49 @@ const EditProduct = () => {
       setLoading(false);
     }
   };
+  const VAT_RATE = 0.05;
 
+
+  const getRetailExVat = () => {
+      const retailIncl = parseFloat(product.retail_price_incl_vat);
+      if (!retailIncl || retailIncl <= 0) return 0;
+      return retailIncl / (1 + VAT_RATE);
+    };
+  
+    // const getVatAmount = () => {
+    //   const retailIncl = parseFloat(product.retailPrice);
+    //   if (!retailIncl || retailIncl <= 0) return 0;
+    //   return retailIncl - getRetailExVat();
+    // };
+  
+    const calculateMarginExVat = () => {
+      const cost = parseFloat(product.cost_price);
+      const retailExVat = getRetailExVat();
+  
+      if (!cost || !retailExVat || retailExVat <= 0) return "0";
+      return (((retailExVat - cost) / retailExVat) * 100).toFixed(1);
+    };
+  
+      const calculateMarginIncVat = () => {
+      const cost = parseFloat(product.cost_price);
+      const retailIncVat = parseFloat(product.retail_price_incl_vat);
+  
+      if (!cost || !retailIncVat || retailIncVat <= 0) return "0";
+      return (((retailIncVat - cost) / retailIncVat) * 100).toFixed(1);
+    };
+  
+  const calculateRetailExVat = () => {
+    const retailIncl = Number(product.retail_price_incl_vat);
+    if (!retailIncl || retailIncl <= 0) return 0;
+    return round2(retailIncl / 1.05);
+  };
+  
+  const calculateVatAmount = () => {
+    const retailIncl = Number(product.retail_price_incl_vat);
+    if (!retailIncl || retailIncl <= 0) return 0;
+    return round2(retailIncl - retailIncl / 1.05);
+  };
+  
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = event.target;
     setProduct((prev) => ({
@@ -218,9 +265,23 @@ const EditProduct = () => {
                     <h2 className="text-base font-semibold text-gray-900">Pricing</h2>
                   </div>
                   {product.cost_price && product.retail_price_incl_vat && (
-                    <span className="text-xs font-medium text-gray-500 px-2.5 py-1 bg-gray-100 rounded-full">
-                      Margin: {calculateMargin()}%
-                    </span>
+                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-medium text-gray-500 px-2.5 py-1 bg-gray-100 rounded-full">
+                        Exc. VAT Margin: {calculateMarginExVat()}%
+                      </span>
+
+                      <span className="text-xs font-medium text-gray-500 px-2.5 py-1 bg-gray-100 rounded-full">
+                        Inc. VAT Margin: {calculateMarginIncVat()}%
+                      </span>
+
+                      <span className="text-xs font-medium text-gray-500 px-2.5 py-1 bg-gray-100 rounded-full">
+                        Retail (Excl. VAT): AED {calculateRetailExVat()}
+                      </span>
+
+                      <span className="text-xs font-medium text-gray-500 px-2.5 py-1 bg-gray-50 rounded-full">
+                        VAT (5%): AED {calculateVatAmount()}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
