@@ -4,12 +4,10 @@ export const dailyProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM(service_items.subtotal_excl_vat), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
-      JOIN products 
-        ON products.id = service_items.product_id
       WHERE DATE(services.created_at) = DATE('now', 'localtime')
     `;
 
@@ -27,12 +25,10 @@ export const last7DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM(service_items.subtotal_excl_vat), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
-      JOIN products 
-        ON products.id = service_items.product_id
       WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-7 days')
         AND DATE(services.created_at) < DATE('now', 'localtime')
     `;
@@ -125,12 +121,10 @@ export const last30DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM(service_items.subtotal_excl_vat), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
-      JOIN products 
-        ON products.id = service_items.product_id
       WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-30 days')
         AND DATE(services.created_at) < DATE('now', 'localtime')
     `;
@@ -187,12 +181,10 @@ export const last365DaysProfit = (): Promise<{ total_profit: number }> => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
-        ROUND(COALESCE(SUM((products.retail_price_incl_vat - products.cost_price) * service_items.quantity), 0), 2) AS total_profit
+        ROUND(COALESCE(SUM(service_items.subtotal_excl_vat), 0), 2) AS total_profit
       FROM services
       JOIN service_items 
         ON services.id = service_items.service_id
-      JOIN products 
-        ON products.id = service_items.product_id
       WHERE DATE(services.created_at) >= DATE('now', 'localtime', '-365 days')
         AND DATE(services.created_at) < DATE('now', 'localtime')
     `;
@@ -285,12 +277,8 @@ export const timelineSummary = (
           )
         ),
         profit_data AS (
-          SELECT ROUND(
-            COALESCE(SUM((p.retail_price_incl_vat - p.cost_price) * si.quantity), 0),
-            2
-          ) AS total_profit
+          SELECT ROUND(COALESCE(SUM(si.subtotal_excl_vat), 0), 2) AS total_profit
           FROM service_items si
-          JOIN products p ON p.id = si.product_id
           JOIN services s ON s.id = si.service_id
           WHERE DATETIME(s.created_at) BETWEEN DATETIME(?) AND DATETIME(?)
         )

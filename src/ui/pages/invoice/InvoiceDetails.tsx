@@ -237,7 +237,6 @@ const InvoiceDetailsPage = () => {
               <button
                 // className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-400 hover:bg-blue-500 text-white font-medium transition-colors shadow-sm"
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white font-medium transition-colors shadow-sm"
-               
                 onClick={() => {
                   navigate(`/edit-invoice/${params.invoiceId}`);
                   // setPdfAction({ ...pdfAction, name: "download" });
@@ -249,7 +248,6 @@ const InvoiceDetailsPage = () => {
               <button
                 // className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-400 hover:bg-blue-500 text-white font-medium transition-colors shadow-sm"
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white font-medium transition-colors shadow-sm"
-                
                 onClick={() => {
                   setOpen(true);
                   setPdfAction({ ...pdfAction, name: "download" });
@@ -273,7 +271,6 @@ const InvoiceDetailsPage = () => {
               <button
                 // className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors shadow-sm"
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white font-medium transition-colors shadow-sm"
-               
                 onClick={handleSheetToggle}
               >
                 <CreditCard className="w-4 h-4" />
@@ -403,14 +400,16 @@ const InvoiceDetailsPage = () => {
                 <div className="flex justify-between items-center text-sm mt-2">
                   <span className="text-gray-600">Labor cost</span>
                   <span className="font-semibold text-gray-900">
-                    {calculateAmountExVat( round2(
-                      Number(
-                        details?.serviceLaborCostList?.reduce(
-                          (sum, item) => sum + item.subtotal_incl_vat,
-                          0
+                    {calculateAmountExVat(
+                      round2(
+                        Number(
+                          details?.serviceLaborCostList?.reduce(
+                            (sum, item) => sum + item.subtotal_incl_vat,
+                            0
+                          )
                         )
                       )
-                    ))}{" "}
+                    )}{" "}
                     AED
                   </span>
                 </div>
@@ -516,7 +515,13 @@ const InvoiceDetailsPage = () => {
                     {details?.serviceBill?.subtotal_excl_vat?.toFixed(2)} AED
                   </span>
                 </div>
-                 <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">VAT (57%)</span>
+                  <span className="font-medium">
+                    {details?.serviceBill?.vat_amount?.toFixed(2)} AED
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
                   <span className="text-gray-600">VAT (5%)</span>
                   <span className="font-medium">
                     {details?.serviceBill?.vat_amount?.toFixed(2)} AED
