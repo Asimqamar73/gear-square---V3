@@ -384,29 +384,29 @@ const MyDocument = ({ details, isTrnInclude, isPaymentDetailsInclude }: any) => 
         <View style={styles.summaryBox}>
           <SummaryRow
             label="Items cost (excl. VAT)"
-            value={round2(
+            value={calculateAmountExVat(round2(
               Number(
                 details.serviceItems.reduce(
-                  (sum: any, item: any) => sum + item.subtotal_excl_vat,
+                  (sum: any, item: any) => sum + item.subtotal_incl_vat,
                   0
                 )
               )
-            )}
+            ))}
           />
           <SummaryRow
             label="Labor cost (excl. VAT)"
-            value={round2(
+            value={calculateAmountExVat(round2(
               Number(
                 details?.serviceLaborCostList?.reduce(
-                  (sum: any, item: any) => sum + item.subtotal_excl_vat,
+                  (sum: any, item: any) => sum + item.subtotal_incl_vat,
                   0
                 )
               )
-            )}
+            ))}
           />
           <SummaryRow
             label="Subtotal"
-            value={details.serviceBill.subtotal_excl_vat}
+            value={round2(details.serviceBill.subtotal_excl_vat)}
             ctmStyle={{
               fontSize: 10,
               borderTop: 1,
@@ -415,11 +415,11 @@ const MyDocument = ({ details, isTrnInclude, isPaymentDetailsInclude }: any) => 
               paddingTop: 4,
             }}
           />
-          <SummaryRow label="VAT (5%)" value={details.serviceBill.vat_amount} />
-          <SummaryRow label="Discount" value={`${details.serviceBill.discount}`} />
+          <SummaryRow label="VAT (5%)" value={round2(details.serviceBill.vat_amount)} />
+          <SummaryRow label="Discount" value={round2(details.serviceBill.discount)} />
           <SummaryRow
             label="Total"
-            value={details.serviceBill.total}
+            value={round2(details.serviceBill.total)}
             ctmStyle={{
               fontSize: 12,
               borderTop: 1,
@@ -429,10 +429,10 @@ const MyDocument = ({ details, isTrnInclude, isPaymentDetailsInclude }: any) => 
             }}
           />
           {isPaymentDetailsInclude && (
-            <SummaryRow label="Paid amount" value={details.serviceBill.amount_paid} />
+            <SummaryRow label="Paid amount" value={round2(details.serviceBill.amount_paid)} />
           )}
           {isPaymentDetailsInclude && (
-            <SummaryRow label="Due amount" value={details.serviceBill.amount_due} />
+            <SummaryRow label="Due amount" value={round2(details.serviceBill.amount_due)} />
           )}
         </View>
 

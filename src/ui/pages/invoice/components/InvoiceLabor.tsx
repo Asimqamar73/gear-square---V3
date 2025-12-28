@@ -20,7 +20,6 @@ interface LabourChargesProps {
   deleteLaborItem: any;
 }
 
-
 const LabourCharges = ({
   labourItems,
   setLabourItems,
@@ -28,15 +27,13 @@ const LabourCharges = ({
   deleteLaborItem,
   setLaborItemsTotalVat,
 }: LabourChargesProps) => {
-
-  
   // Calculate totals whenever labourItems changes
   useEffect(() => {
     const totalLabourAmount = labourItems.reduce(
       (acc, item) => acc + (Number(item.inclVatTotal) || 0),
       0
     );
-    
+
     // Calculate total VAT from all labor items
     // const totalVat = labourItems.reduce(
     //   (acc, item) => acc + calculateVatAmount(Number(item.inclVatTotal) || 0),
@@ -55,7 +52,7 @@ const LabourCharges = ({
 
   const handleChange = (idx: number, field: keyof LabourCharge, value: string | number) => {
     const updated = [...labourItems];
-    
+
     if (field === "inclVatTotal") {
       const numValue = Number(value) || 0;
       updated[idx].inclVatTotal = numValue;
@@ -65,7 +62,7 @@ const LabourCharges = ({
       //@ts-ignore
       updated[idx][field] = value;
     }
-    
+
     setLabourItems(updated);
   };
 
@@ -163,7 +160,8 @@ const LabourCharges = ({
 
       {/* Total Amount */}
       <div className="text-right font-semibold text-gray-800">
-        Total Labor cost: AED {totalLabourAmount.toFixed(2)}
+          <span>Total Labor cost: </span>
+        AED {calculateAmountExVat(totalLabourAmount)}
       </div>
     </div>
   );

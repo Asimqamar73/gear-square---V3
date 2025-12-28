@@ -1,4 +1,5 @@
 import { Edit2, Eye, Hash, Trash2 } from "lucide-react";
+import { round2 } from "../../../utils/Round2";
 
 interface VehicleService {
   id: number;
@@ -142,13 +143,13 @@ const VehicleServicesTable = ({
 
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-medium text-gray-900">
-                          {service.total.toFixed(2)} AED
+                          {round2(service.total)} AED
                         </span>
                       </td>
 
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm text-gray-600">
-                          {service.amount_paid.toFixed(2)} AED
+                          {round2(service.amount_paid)} AED
                         </span>
                       </td>
 
@@ -158,7 +159,7 @@ const VehicleServicesTable = ({
                             service.amount_due > 0 ? "text-gray-900" : "text-gray-400"
                           }`}
                         >
-                          {service.amount_due.toFixed(2)} AED
+                          {round2(service.amount_due)} AED
                         </span>
                       </td>
 
@@ -225,12 +226,12 @@ const VehicleServicesTable = ({
                   </td>
                   <td className="px-6 py-3.5 text-right">
                     <span className="text-sm font-semibold text-gray-900">
-                      {totals.totalAmount.toFixed(2)} AED
+                      {round2(totals.totalAmount)} AED
                     </span>
                   </td>
                   <td className="px-6 py-3.5 text-right">
                     <span className="text-sm font-medium text-gray-700">
-                      {totals.totalPaid.toFixed(2)} AED
+                      {round2(totals.totalPaid)} AED
                     </span>
                   </td>
                   <td className="px-6 py-3.5 text-right">
@@ -239,7 +240,7 @@ const VehicleServicesTable = ({
                         totals.totalDue > 0 ? "text-gray-900" : "text-gray-400"
                       }`}
                     >
-                      {totals.totalDue.toFixed(2)} AED
+                      {round2(totals.totalDue)} AED
                     </span>
                   </td>
                   <td colSpan={3} className="px-6 py-3.5 text-right">

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import DatePicker from "../../../components/DatePicker";
+import { round2 } from "../../utils/Round2";
 
 interface DashboardStats {
   profit: number;
@@ -174,7 +175,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard
               title="Profit"
-              value={`${stats.today.profit.toFixed(2)} AED`}
+              value={`${round2(stats.today.profit)} AED`}
               icon={<TrendingUp className="w-6 h-6" />}
               iconBg="bg-green-100"
               iconColor="text-green-600"
@@ -189,7 +190,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="Due Amount"
-              value={`${stats.today.dueAmount.toFixed(2)} AED`}
+              value={`${round2(stats.today.dueAmount)} AED`}
               icon={<AlertCircle className="w-6 h-6" />}
               iconBg="bg-red-100"
               iconColor="text-red-600"
@@ -204,7 +205,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard
               title="Profit"
-              value={`${stats.last7Days.profit.toFixed(2)} AED`}
+              value={`${round2(stats.last7Days.profit)} AED`}
               icon={<DollarSign className="w-6 h-6" />}
               iconBg="bg-gray-200"
               iconColor="text-green-600"
@@ -220,7 +221,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="Due Amount"
-              value={`${stats.last7Days.dueAmount.toFixed(2)} AED`}
+              value={`${round2(stats.last7Days.dueAmount)} AED`}
               icon={<AlertCircle className="w-6 h-6" />}
               iconBg="bg-red-100"
               iconColor="text-red-600"
@@ -235,7 +236,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard
               title="Profit"
-              value={`${stats.last30Days.profit.toFixed(2)} AED`}
+              value={`${round2(stats.last30Days.profit)} AED`}
               icon={<DollarSign className="w-6 h-6" />}
               iconBg="bg-gray-200"
               iconColor="text-green-600"
@@ -251,7 +252,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="Due Amount"
-              value={`${stats.last30Days.dueAmount.toFixed(2)} AED`}
+              value={`${round2(stats.last30Days.dueAmount)} AED`}
               icon={<AlertCircle className="w-6 h-6" />}
               iconBg="bg-red-100"
               iconColor="text-red-600"
@@ -266,7 +267,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard
               title="Profit"
-              value={`${stats.last365Days.profit.toFixed(2)} AED`}
+              value={`${round2(stats.last365Days.profit)} AED`}
               icon={<DollarSign className="w-6 h-6" />}
               iconBg="bg-gray-200"
               iconColor="text-green-600"
@@ -282,7 +283,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="Due Amount"
-              value={`${stats.last365Days.dueAmount.toFixed(2)} AED`}
+              value={`${round2(stats.last365Days.dueAmount)} AED`}
               icon={<AlertCircle className="w-6 h-6" />}
               iconBg="bg-red-100"
               iconColor="text-red-600"
@@ -326,7 +327,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <StatCard
                 title="Profit"
-                value={`${stats.custom.profit.toFixed(2)} AED`}
+                value={`${round2(stats.custom.profit)} AED`}
                 icon={<DollarSign className="w-6 h-6" />}
                 iconBg="bg-gray-200"
                 iconColor="text-green-600"
@@ -340,7 +341,7 @@ const Dashboard = () => {
               />
               <StatCard
                 title="Due Amount"
-                value={`${stats.custom.dueAmount.toFixed(2)} AED`}
+                value={`${round2(stats.custom.dueAmount)} AED`}
                 icon={<AlertCircle className="w-6 h-6" />}
                 iconBg="bg-red-100"
                 iconColor="text-red-600"
@@ -365,7 +366,6 @@ const StatCard = ({
   icon,
   iconBg,
   iconColor,
-  trend,
   compact = false,
 }: {
   title: string;
@@ -381,12 +381,7 @@ const StatCard = ({
       <div className="flex-1">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{title}</p>
         <p className={`${compact ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 mb-1`}>{value}</p>
-        {trend && (
-          <div className={`inline-flex items-center gap-1 text-xs font-medium ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-            {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-            <span>{trend === 'up' ? 'Positive' : 'Outstanding'}</span>
-          </div>
-        )}
+     
       </div>
       <div className={`${compact ? 'w-11 h-11' : 'w-12 h-12'} rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0`}>
         <div className={iconColor}>{icon}</div>

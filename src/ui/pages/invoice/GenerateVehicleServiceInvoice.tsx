@@ -497,6 +497,7 @@ export const GenerateVehicleServiceInvoice = () => {
             items={items}
             addNewItem={addNewItem}
             deleteItem={deleteItem}
+            totalProductsAmount={totalBill}
           />
         </div>
 

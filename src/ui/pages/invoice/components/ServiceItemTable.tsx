@@ -9,7 +9,7 @@ interface ServiceItem {
   retail_price_excl_vat: number;
   subtotal_excl_vat: number;
   subtotal_incl_vat: number;
-  unit_price_incl_vat: number,
+  unit_price_incl_vat: number;
   vat_amount: number;
   quantity: number;
   subtotal: number;
@@ -177,7 +177,7 @@ const ServiceItemTable = ({ data, setTotalItemsCost }: ServiceItemTableProps) =>
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500">Subtotal (excl. VAT)</span>
                       <span className="text-base font-bold text-gray-900">
-                        {totals.subtotal.toFixed(2)} AED
+                        {round2(totals.subtotal)} AED
                       </span>
                     </div>
                   </td>
@@ -185,7 +185,7 @@ const ServiceItemTable = ({ data, setTotalItemsCost }: ServiceItemTableProps) =>
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500">Subtotal (incl. VAT)</span>
                       <span className="text-base font-bold text-gray-900">
-                        {totals?.subtotalInclVAT?.toFixed(2)} AED
+                        {totals?.subtotalInclVAT ? round2(totals?.subtotalInclVAT) : 0} AED
                       </span>
                     </div>
                   </td>

@@ -383,7 +383,7 @@ const InvoiceDetailsPage = () => {
 
             <div className="space-y-4">
               {/* Invoice Number */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border-t border-gray-300">
                 <span className="text-sm font-medium text-gray-700">Invoice Number</span>
                 <span className="font-bold text-gray-600">#{details?.service?.id}</span>
               </div>
@@ -414,31 +414,42 @@ const InvoiceDetailsPage = () => {
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-sm pb-2 pt-2 border-t-2 border-gray-300 ">
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-300 ">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-semibold text-gray-900">
-                    {details?.serviceBill?.subtotal_excl_vat?.toFixed(2)} AED
+                    {round2(details?.serviceBill?.subtotal_excl_vat || 0)} AED
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">VAT (5%)</span>
                   <span className="font-semibold text-green-600">
-                    +{details?.serviceBill?.vat_amount?.toFixed(2)} AED
+                    +{round2(details?.serviceBill?.vat_amount || 0)} AED
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-300">
+                  <span className="text-gray-600">After VAT</span>
+                  <span className="font-semibold">
+                    {round2(
+                      //@ts-ignore
+                      details?.serviceBill?.total + details?.serviceBill?.discount
+                    )}{" "}
+                    AED
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Discount</span>
                   <span className="font-semibold text-orange-600">
-                    -{details?.serviceBill?.discount?.toFixed(2)} AED
+                    -{details?.serviceBill?.discount ? round2(details.serviceBill.discount) : 0 } AED
                   </span>
                 </div>
 
-                <div className="pt-3 border-t-2 border-gray-300">
+                <div className="pt-3 border-t border-gray-300">
                   <div className="flex justify-between items-center text-gray-700 font-bold">
                     <span className="">Total Amount</span>
-                    <span className="text-lg">{details?.serviceBill?.total?.toFixed(2)} AED</span>
+                    <span className="text-lg">{details?.serviceBill?.total ? round2(details?.serviceBill?.total) : 0} AED</span>
                   </div>
                 </div>
 
@@ -446,14 +457,14 @@ const InvoiceDetailsPage = () => {
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Paid Amount</span>
                     <span className="font-semibold text-green-700">
-                      {details?.serviceBill?.amount_paid?.toFixed(2)} AED
+                      {details?.serviceBill?.amount_paid ? round2(details?.serviceBill?.amount_paid) : 0} AED
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Outstanding Balance</span>
                     <span className="font-semibold text-red-600">
-                      {details?.serviceBill?.amount_due?.toFixed(2)} AED
+                      {details?.serviceBill?.amount_due ? round2(details?.serviceBill?.amount_due) : 0} AED
                     </span>
                   </div>
                 </div>
@@ -512,19 +523,13 @@ const InvoiceDetailsPage = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium">
-                    {details?.serviceBill?.subtotal_excl_vat?.toFixed(2)} AED
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">VAT (57%)</span>
-                  <span className="font-medium">
-                    {details?.serviceBill?.vat_amount?.toFixed(2)} AED
+                    {details?.serviceBill?.subtotal_excl_vat ?  round2(details?.serviceBill?.subtotal_excl_vat) : 0} AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">VAT (5%)</span>
                   <span className="font-medium">
-                    {details?.serviceBill?.vat_amount?.toFixed(2)} AED
+                    {details?.serviceBill?.vat_amount ? round2(details?.serviceBill?.vat_amount) : 0 } AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -533,7 +538,7 @@ const InvoiceDetailsPage = () => {
                 </div>
                 <div className="flex justify-between text-sm font-semibold pt-2 border-t border-blue-300">
                   <span>Total Amount</span>
-                  <span>{details?.serviceBill?.total?.toFixed(2)} AED</span>
+                  <span>{details?.serviceBill?.total ? round2(details?.serviceBill?.total) : 0} AED</span>
                 </div>
               </div>
             </div>
@@ -548,13 +553,13 @@ const InvoiceDetailsPage = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Already Paid</span>
                   <span className="font-medium text-green-600">
-                    {details?.serviceBill?.amount_paid?.toFixed(2)} AED
+                    {details?.serviceBill?.amount_paid ? round2(details?.serviceBill?.amount_paid) : 0} AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Due amount</span>
                   <span className="font-medium text-red-600">
-                    {details?.serviceBill?.amount_due?.toFixed(2)} AED
+                    {details?.serviceBill?.amount_due ? round2(details?.serviceBill?.amount_due) : 0} AED
                   </span>
                 </div>
               </div>
@@ -581,7 +586,7 @@ const InvoiceDetailsPage = () => {
                 }}
               />
               <p className="text-xs text-gray-500">
-                Maximum: {details?.serviceBill?.amount_due?.toFixed(2)} AED
+                Maximum: {details?.serviceBill?.amount_due ? round2(details?.serviceBill?.amount_due) : 0} AED
               </p>
             </div>
 

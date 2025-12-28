@@ -708,6 +708,7 @@ export const EditCustomerInvoice = () => {
             items={items}
             addNewItem={addNewItem}
             deleteItem={deleteItem}
+            totalProductsAmount={totalBill}
           />
 
           <LabourCharges
@@ -734,7 +735,7 @@ export const EditCustomerInvoice = () => {
               <div className="bg-gray-50 space-y-2 p-2 rounded-xl border border-gray-300">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Products Subtotal</span>
-                  <span className="font-medium text-gray-900">{totalBill.toFixed(2)} AED</span>
+                  <span className="font-medium text-gray-900">{totalBill} AED</span>
                 </div>
 
                 <div className="flex justify-between text-sm">
@@ -751,26 +752,26 @@ export const EditCustomerInvoice = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">VAT (5%) - Products</span>
                   <span className="font-medium text-gray-900">
-                    {totals.productVat.toFixed(2)} AED
+                    {round2(totals.productVat)} AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm border-gray-300 ">
                   <span className="text-gray-600">VAT (5%) - Labor</span>
                   <span className="font-medium text-gray-900">
-                    {totals.laborVat.toFixed(2)} AED
+                    {round2(totals.laborVat)} AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm pt-3 border-t-2 border-gray-300">
                   <span className="text-gray-600 font-medium">VAT (5%)</span>
                   <span className="font-medium text-gray-900">
-                    {totals.vatTotal.toFixed(2)} AED
+                    {round2(totals.vatTotal)} AED
                   </span>
                 </div>
               </div>
 
               <div className="flex justify-between text-sm pt-4 border-t-2 border-gray-300">
                 <span className="text-gray-600">After VAT</span>
-                <span className="font-medium text-gray-900">{totals.afterVat.toFixed(2)} AED</span>
+                <span className="font-medium text-gray-900">{round2(totals.afterVat)} AED</span>
               </div>
 
               <div className="space-y-2">
@@ -808,7 +809,7 @@ export const EditCustomerInvoice = () => {
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-900">Total</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {totals.total.toFixed(2)} AED
+                    {round2(totals.total)} AED
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -818,7 +819,7 @@ export const EditCustomerInvoice = () => {
                       totals.remaining > 0 ? "text-red-600" : "text-green-600"
                     }`}
                   >
-                    {totals.remaining.toFixed(2)} AED
+                    {round2(totals.remaining)} AED
                   </span>
                 </div>
               </div>
