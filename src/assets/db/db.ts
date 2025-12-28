@@ -10,13 +10,6 @@ import { create_service_table } from "./tables/services.js";
 import { create_service_items_table } from "./tables/serviceItems.js";
 import { create_service_bill_table } from "./tables/serviceBill.js";
 import { create_vehicles_table } from "./tables/vehicles.js";
-import {
-  create_customers_triggers,
-  create_products_triggers,
-  create_services_triggers,
-  create_vehicles_triggers,
-  createDeductProductQuantityTrigger,
-} from "./triggers/triggers.js";
 import { create_service_labor_charges_table } from "./tables/serviceLaborCharges.js";
 
 const __filename = fileURLToPath(import.meta.url);

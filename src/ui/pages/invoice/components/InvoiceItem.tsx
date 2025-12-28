@@ -2,7 +2,6 @@ import { Combobox } from "../../../../components/ComboBox";
 import { Button } from "../../../../components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { round2 } from "../../../utils/Round2";
-import { calculateAmountExVat } from "../../../utils/vatHelpers";
 
 const calculateRetailExVat = (withVatTotal: number) => {
   const retailIncl = Number(withVatTotal);
@@ -34,15 +33,6 @@ const InvoiceItem = ({
             <label htmlFor="name" className="text-sm text-gray-500">
               Name
             </label>
-            {/* <Combobox
-              data={products}
-              emptyMessage="No product found...."
-              placeholder="Search product...."
-              value={comboboxValue}
-              handleProductChange={handleProductChange}
-              item={item}
-              itemIdx={idx}
-            /> */}
 
             <Combobox
               data={products.filter(

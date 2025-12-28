@@ -6,8 +6,6 @@ import {
   Calendar,
   Loader2,
   DollarSign,
-  ArrowUpRight,
-  ArrowDownRight,
   Wrench,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";

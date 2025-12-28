@@ -166,14 +166,7 @@ const EditProduct = () => {
     }
   };
 
-  const calculateMargin = () => {
-    const cost = parseFloat(product.cost_price);
-    const retail = parseFloat(product.retail_price_incl_vat);
-    if (cost && retail && retail > 0) {
-      return (((retail - cost) / retail) * 100).toFixed(1);
-    }
-    return "0";
-  };
+
 
   if (loading) {
     return (
