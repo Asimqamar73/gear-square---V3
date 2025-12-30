@@ -177,12 +177,12 @@ export function updateServiceByServiceId(data: {
       if (labor_changes.added.length > 0) {
         
         const insertLabourStmt = db.prepare(
-          "INSERT INTO labour_charges (service_id, title, description, subtotal_excl_vat, subtotal_incl_vat, vat_amount) VALUES (?, ?, ?, ?, ?, ?)"
+          "INSERT INTO labour_charges (service_id, labour_type_id, description, subtotal_excl_vat, subtotal_incl_vat, vat_amount) VALUES (?, ?, ?, ?, ?, ?)"
         );
         for (const labour of labor_changes.added) {
           insertLabourStmt.run(
             service_id,
-            labour.title,
+            labour.labour_type_id,
             labour.description || null,
             labour.exclVatTotal || 0,
             labour.inclVatTotal || 0,
@@ -200,11 +200,11 @@ export function updateServiceByServiceId(data: {
       // 2c. Update existing labour items (updated with VAT fields)
       if (labor_changes.updated.length > 0) {
         const updateLabourStmt = db.prepare(
-          "UPDATE labour_charges SET title = ?, description = ?, subtotal_excl_vat = ?, subtotal_incl_vat = ?, vat_amount = ? WHERE id = ?"
+          "UPDATE labour_charges SET labour_type_id = ?, description = ?, subtotal_excl_vat = ?, subtotal_incl_vat = ?, vat_amount = ? WHERE id = ?"
         );
         for (const labour of labor_changes.updated) {
           updateLabourStmt.run(
-            labour.title,
+            labour.labour_type_id,
             labour.description || null,
             labour.exclVatTotal || 0,
             labour.inclVatTotal || 0,

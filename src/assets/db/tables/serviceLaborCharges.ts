@@ -5,14 +5,15 @@ export const create_service_labor_charges_table = () => {
     `
 CREATE TABLE IF NOT EXISTS labour_charges (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    labour_type_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
-    title TEXT NOT NULL,
     description TEXT,
     
     subtotal_excl_vat DECIMAL(12, 2) NOT NULL CHECK(subtotal_excl_vat >= 0),
     vat_amount DECIMAL(12, 2) NOT NULL CHECK(vat_amount >= 0),
     subtotal_incl_vat DECIMAL(12, 2) NOT NULL CHECK(subtotal_incl_vat >= 0),
     
+    FOREIGN KEY(labour_type_id) REFERENCES labour_type(id) ON DELETE CASCADE
     FOREIGN KEY(service_id) REFERENCES services(id) ON DELETE CASCADE
 );
 `,
@@ -31,12 +32,14 @@ export async function getServicelaborCostList(id: number) {
       db.all(
         `SELECT 
         lc.id,
-        lc.title,
         lc.description,
+        lt.title,
+        lt.id as labour_type_id,
         lc.subtotal_excl_vat,
         lc.subtotal_incl_vat,
         lc.vat_amount as labor_item_vat
         FROM labour_charges as lc 
+        JOIN labour_type lt ON lt.id = lc.labour_type_id
         where lc.service_id = ?`,
         [id],
         (err: any, rows: any) => {

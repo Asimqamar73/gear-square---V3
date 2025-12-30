@@ -33,12 +33,11 @@ interface IItems {
 }
 
 interface LaborItem {
-  title: string;
+  labourType: any; // stores the selected labour type object
   description: string;
   inclVatTotal: number;
   exclVatTotal: number;
   vat: number;
-  id?: number;
 }
 
 interface ICustomerInfo {
@@ -77,6 +76,7 @@ export const EditCustomerInvoice = () => {
   };
 
   const [products, setProducts] = useState([]);
+  const [laborTypes, setLaborTypes] = useState([]);
   const [customerInfo, setCustomerInfo] = useState<ICustomerInfo | null>(null);
   const [totalBill, setTotalBill] = useState(0);
   const [totalVat, setTotalVat] = useState(0);
@@ -95,26 +95,65 @@ export const EditCustomerInvoice = () => {
   // Track original data for comparison
   const [originalItems, setOriginalItems] = useState<any>([]);
   const [originalLaborItems, setOriginalLaborItems] = useState<any>([]);
-
   useEffect(() => {
-    fetchAllProducts();
+    loadAllData();
   }, []);
 
-  const fetchAllProducts = async () => {
+  const loadAllData = async () => {
     try {
-      //@ts-ignore
-      const { data } = await window.electron.getProducts();
-      setProducts(data || []);
-      fetchDetails(params.invoiceId, data);
+      // Fetch both in parallel and wait for both to complete
+      const [productsResult, laborTypesResult] = await Promise.allSettled([
+        fetchAllProducts(),
+        fetchAllLaborTypes(),
+      ]);
+
+      const products = productsResult.status === "fulfilled" ? productsResult.value : [];
+      const laborTypes = laborTypesResult.status === "fulfilled" ? laborTypesResult.value : [];
+
+      // Now fetch details with both data available
+      if (products && laborTypes) {
+        await fetchDetails(params.invoiceId, products, laborTypes);
+      }
     } catch (error) {
-      toast.error("Failed to load products. Please try again.", {
+      console.error("Error loading data:", error);
+      toast.error("Failed to load data. Please try again.", {
         position: "top-center",
       });
       setLoading(false);
     }
   };
 
-  const fetchDetails = async (id: any, products: any) => {
+  const fetchAllProducts = async () => {
+    try {
+      //@ts-ignore
+      const { data } = await window.electron.getProducts();
+      setProducts(data || []);
+      return data || [];
+    } catch (error) {
+      toast.error("Failed to load products. Please try again.", {
+        position: "top-center",
+      });
+      setLoading(false);
+      return [];
+    }
+  };
+
+  const fetchAllLaborTypes = async () => {
+    try {
+      //@ts-ignore
+      const { response } = await window.electron.getAllLaborTypes();
+      console.log(response.data);
+      setLaborTypes(response.data || []);
+      return response.data || [];
+    } catch (error) {
+      toast.error("Failed to load labor types. Please try again.", {
+        position: "top-center",
+      });
+      return [];
+    }
+  };
+
+  const fetchDetails = async (id: any, productsData: any, laborTypesData: any) => {
     try {
       //@ts-ignore
       const resp = await window.electron.getInvoiceDetails(id);
@@ -124,18 +163,36 @@ export const EditCustomerInvoice = () => {
       setAmountPaid(resp.serviceBill.amount_paid);
       setDiscount(resp.serviceBill.discount);
 
-      // Set labor items and calculate labor cost
+      // Set labor items and calculate labor cost - FIXED VERSION
       const laborItemsList =
-        resp?.serviceLaborCostList.map((list: any) => {
-          return {
-            description: list.description,
-            id: list.id,
-            title: list.title,
-            vat: list.labor_item_vat,
-            exclVatTotal: list.subtotal_excl_vat,
-            inclVatTotal: list.subtotal_incl_vat,
-          };
-        }) || [];
+        laborTypesData
+          .filter((lt: any) =>
+            resp.serviceLaborCostList.some((slc: any) => lt.id === slc.labour_type_id)
+          )
+          .map((lt: any) => {
+            // FIXED: Use serviceLaborCostList instead of serviceItems
+            const match = resp.serviceLaborCostList.find(
+              (slc: any) => slc.labour_type_id === lt.id
+            );
+
+            if (!match) return null;
+
+            // FIXED: Use values from match (the saved service labor cost), not from lt (labor type)
+            const inclVatTotal = match.subtotal_incl_vat;
+            const exclVatTotal = match.subtotal_excl_vat;
+            const vatTotal = match.labor_item_vat;
+
+            return {
+              labourType: lt,
+              exclVatTotal,
+              inclVatTotal,
+              vat: vatTotal,
+              id: match.id,
+              description: match.description || "",
+            };
+          })
+          .filter((item: any) => item !== null) || [];
+
       setLaborItems(laborItemsList);
 
       // Calculate total labor cost (incl VAT) and VAT
@@ -148,7 +205,7 @@ export const EditCustomerInvoice = () => {
       setLaborItemsTotalVat(laborItemsVAT);
 
       // Map service items to match the new structure
-      const f_items = products
+      const f_items = productsData
         .filter((p: any) => resp.serviceItems.some((i: any) => i.product_id === p.id))
         .map((p: any) => {
           const match = resp.serviceItems.find((i: any) => i.product_id === p.id);
@@ -168,8 +225,6 @@ export const EditCustomerInvoice = () => {
       setItems(f_items);
 
       // Calculate totals for products
-      // const productSubtotal = f_items.reduce((acc: number, item: any) => acc + item.subtotal, 0);
-      // const productVat = f_items.reduce((acc: number, item: any) => acc + item.itemVatTotal, 0);
       const total = round2(f_items.reduce((acc: number, item: any) => acc + item.inclVatTotal, 0));
       const productSubtotal = calculateAmountExVat(total);
       const productVat = calculateVatAmount(total);
@@ -179,15 +234,7 @@ export const EditCustomerInvoice = () => {
       // Store original items for tracking changes
       setOriginalItems(JSON.parse(JSON.stringify(f_items)));
       setOriginalLaborItems(JSON.parse(JSON.stringify(laborItemsList)));
-      // Calculate payment status
-      // const totals = calculateTotalsHelper(
-      //   productSubtotal,
-      //   productVat,
-      //   totalLaborCostInclVat,
-      //   laborItemsVAT,
-      //   resp.serviceBill.discount,
-      //   resp.serviceBill.amount_paid
-      // );
+
       setPaymentStatus(resp.serviceBill.bill_status);
     } catch (error) {
       toast.error("Failed to load invoice details. Please try again.", {
@@ -200,8 +247,6 @@ export const EditCustomerInvoice = () => {
   };
 
   const updatePaymentStatus = (data: any, total: number) => {
-    console.log(data);
-    console.log(total);
     const paidAmount = Number(data) || 0;
     console.log(paidAmount < Number(total));
     if (paidAmount === 0) {
@@ -238,8 +283,6 @@ export const EditCustomerInvoice = () => {
       laborItems.reduce((prev, curr) => prev + Number(curr.inclVatTotal), 0)
     );
     const laborCostExclVat = calculateAmountExVat(laborCostInclVat);
-    console.log("productSubtotal", productSubtotal);
-    console.log("productVat", productVat);
     const subtotal = productSubtotal + laborCostExclVat;
     const vatTotal = productVat + laborVat;
     const afterVat = subtotal + vatTotal;
@@ -252,11 +295,11 @@ export const EditCustomerInvoice = () => {
       laborVat,
       productVat,
       laborCostExclVat,
-      vatTotal,
-      subtotal,
+      vatTotal : round2(vatTotal),
+      subtotal : round2(subtotal),
       afterVat,
       validDiscount,
-      total,
+      total : round2(total),
       validPaidAmount,
       remaining,
     };
@@ -480,11 +523,11 @@ export const EditCustomerInvoice = () => {
 
     // Find added and updated labor items
     laborItems.forEach((labor: any) => {
-      if (!labor.title) return;
+      if (!labor.labourType) return;
       if (!labor.id) {
         changes.added.push({
           description: labor.description,
-          title: labor.title,
+          labour_type_id: labor.labourType.id,
           inclVatTotal: labor.inclVatTotal,
           exclVatTotal: labor.exclVatTotal,
           vat: labor.vat,
@@ -495,12 +538,12 @@ export const EditCustomerInvoice = () => {
           const hasChanged =
             original.description !== labor.description ||
             original.inclVatTotal !== labor.inclVatTotal ||
-            original.title !== labor.title;
+            original.labourType.id !== labor.labourType.id;
           if (hasChanged) {
             changes.updated.push({
               id: labor.id,
               description: labor.description,
-              title: labor.title,
+              labour_type_id: labor.labourType.id,
               inclVatTotal: labor.inclVatTotal,
               exclVatTotal: labor.exclVatTotal,
               vat: labor.vat,
@@ -517,8 +560,7 @@ export const EditCustomerInvoice = () => {
     // Validation
     const hasNoItems = items.length === 0 || items.every((item) => item.product === null);
     const hasNoLaborItems =
-      laborItems.length === 0 ||
-      laborItems.every((labor) => !labor.title || labor.title.trim() === "");
+      laborItems.length === 0 || laborItems.every((labor) => !labor.labourType);
 
     if (hasNoItems && hasNoLaborItems) {
       toast.error("Please add at least one service item or labor item", {
@@ -532,7 +574,24 @@ export const EditCustomerInvoice = () => {
       const itemChanges = detectItemChanges();
       const laborChanges = detectLaborChanges();
       const totals = calculateTotals();
-
+console.log({
+        service_id: params.invoiceId,
+        items_changes: itemChanges,
+        labor_changes: laborChanges,
+        items,
+        labor_item: laborItems,
+        total: totals.total,
+        subtotal: totals.subtotal,
+        vat_amount: totals.vatTotal,
+        discount_percentage: totals.validDiscount,
+        discount_amount: totals.validDiscount,
+        amount_paid: totals.validPaidAmount,
+        labor_cost: calculateRetailExVat(Number(laborCost)),
+        service_note: serviceNote,
+        payment_status: updatePaymentStatus(totals.validPaidAmount, totals.total),
+        //@ts-ignore
+        updated_by: JSON.parse(localStorage.getItem("gear-square-user")).id,
+      })
       // @ts-ignore
       const response = await window.electron.updateInvoice({
         service_id: params.invoiceId,
@@ -670,7 +729,7 @@ export const EditCustomerInvoice = () => {
                   <InfoRow
                     icon={<Hash className="w-4 h-4 text-gray-600" />}
                     value={customerInfo.vehicle_number}
-                    subValue={`Chassis: ${customerInfo.chassis_number}`}
+                    subValue={`${customerInfo.chassis_number ? `Chassis: ${customerInfo.chassis_number }` :""}`}
                   />
                 )}
                 {customerInfo?.year && (
@@ -717,6 +776,7 @@ export const EditCustomerInvoice = () => {
             setTotalLaborCost={setLaborCost}
             deleteLaborItem={deleteLaborItem}
             setLaborItemsTotalVat={setLaborItemsTotalVat}
+            labourTypes={laborTypes}
           />
         </div>
         <div className="flex justify-end mt-8">
@@ -751,21 +811,15 @@ export const EditCustomerInvoice = () => {
               <div className="bg-gray-50 p-2 rounded-xl space-y-2 border border-gray-300">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">VAT (5%) - Products</span>
-                  <span className="font-medium text-gray-900">
-                    {round2(totals.productVat)} AED
-                  </span>
+                  <span className="font-medium text-gray-900">{round2(totals.productVat)} AED</span>
                 </div>
                 <div className="flex justify-between text-sm border-gray-300 ">
                   <span className="text-gray-600">VAT (5%) - Labor</span>
-                  <span className="font-medium text-gray-900">
-                    {round2(totals.laborVat)} AED
-                  </span>
+                  <span className="font-medium text-gray-900">{round2(totals.laborVat)} AED</span>
                 </div>
                 <div className="flex justify-between text-sm pt-3 border-t-2 border-gray-300">
                   <span className="text-gray-600 font-medium">VAT (5%)</span>
-                  <span className="font-medium text-gray-900">
-                    {round2(totals.vatTotal)} AED
-                  </span>
+                  <span className="font-medium text-gray-900">{round2(totals.vatTotal)} AED</span>
                 </div>
               </div>
 

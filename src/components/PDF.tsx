@@ -214,7 +214,7 @@ const TableRowItem = ({ item, index }: any) => {
       </View>
       <View style={[styles.tableCell, { width: "13%" }]}>
         {/* <Text>{round2(calculateAmountExVat(item.unit_price_incl_vat))}</Text> */}
-        <Text>{item.unit_price_incl_vat}</Text>
+        <Text>{calculateAmountExVat(item.unit_price_incl_vat)}</Text>
       </View>
       <View style={[styles.tableCell, { width: "13%" }]}>
         <Text>{item.subtotal_excl_vat}</Text>

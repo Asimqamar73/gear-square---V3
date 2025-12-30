@@ -8,6 +8,8 @@ import {
   UserPlus,
   Users,
   FileText,
+  Wrench,
+  PlusCircle,
 } from "lucide-react";
 
 import {
@@ -87,6 +89,21 @@ const menuItems: MenuSection[] = [
         title: "Add Customer",
         url: "/add-customer",
         icon: UserPlus,
+      },
+    ],
+  },
+  {
+    parent: "Labor",
+    children: [
+      {
+        title: "All Labor types",
+        url: "/labor-types/list",
+        icon: Wrench,
+      },
+      {
+        title: "Add Labor type",
+        url: "/labor-types/add",
+        icon: PlusCircle,
       },
     ],
   },

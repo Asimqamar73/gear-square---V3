@@ -1,4 +1,3 @@
-import { timelineSummary } from "./../assets/db/tables/dashboard";
 const electron = require("electron");
 
 electron.contextBridge.exposeInMainWorld("electron", {
@@ -80,25 +79,15 @@ electron.contextBridge.exposeInMainWorld("electron", {
     return result;
   },
 
-  // updateInvoice: async (data: any) => {
-  //   const result = await electron.ipcRenderer.invoke("db:update-invoice", data);
-  //   return result;
-  // },
-// updateInvoice : async (data: any) => {
-//   const result = await electron.ipcRenderer.invoke("db:update-invoice", data);
-//   return result;
-// },
+  deleteInvoice: async (id: number) => {
+    const result = await electron.ipcRenderer.invoke("db:delete-invoice-by-id", id);
+    return result;
+  },
 
-
-deleteInvoice : async (id: number) => {
-  const result = await electron.ipcRenderer.invoke("db:delete-invoice-by-id", id);
-  return result;
-},
-
-updateInvoice : async (data: any) => {
-  const result = await electron.ipcRenderer.invoke("db:update-invoice", data);
-  return result;
-},
+  updateInvoice: async (data: any) => {
+    const result = await electron.ipcRenderer.invoke("db:update-invoice", data);
+    return result;
+  },
 
   getInvoices: async (data: any) => {
     return await electron.ipcRenderer.invoke("db:get-invoices", data);
@@ -229,5 +218,33 @@ updateInvoice : async (data: any) => {
 
   updateVehicleDetails: async (data: number) => {
     return await electron.ipcRenderer.invoke("db:update-vehicle-details", data);
+  },
+
+  // Labor types
+  addLaborType: async (data: any) => {
+    return await electron.ipcRenderer.invoke("db:add-labor-type", data);
+  },
+  updateLaborTypeDetails: async (data: any) => {
+    return await electron.ipcRenderer.invoke("db:update-labour-type-details", data);
+  },
+
+  getAllLaborTypes: async (paginationArgs: any) => {
+    // paginationArgs = { limit: number, offset: number }
+    const result = await electron.ipcRenderer.invoke("db:get-all-labor-types", paginationArgs);
+    return result;
+  },
+
+  getLaborTypeById: async (id: number) => {
+    const result = await electron.ipcRenderer.invoke("db:get-labor-type-by-id", id);
+
+    return result;
+  },
+  searchLaborType: async (search: string, pagination: { limit: number; offset: number }) => {
+    const result = await electron.ipcRenderer.invoke("db:search-labor-type", {
+      search,
+      ...pagination,
+    });
+
+    return result; // { data: [], total: number }
   },
 });

@@ -11,7 +11,7 @@ export const create_service_bill_table = () => {
     vat_amount DECIMAL(12, 2) NOT NULL CHECK(vat_amount >= 0),
     discount DECIMAL(12, 2) DEFAULT 0.00 CHECK(discount >= 0),
     total DECIMAL(12, 2) NOT NULL CHECK(total >= 0),
-    amount_paid DECIMAL(12, 2) DEFAULT 0.00 CHECK(amount_paid >= 0 AND amount_paid <= total),
+    amount_paid DECIMAL(12, 2) DEFAULT 0.00,
     amount_due DECIMAL(12, 2) GENERATED ALWAYS AS (total - COALESCE(amount_paid, 0)) STORED,
     bill_status INTEGER DEFAULT 0,
 

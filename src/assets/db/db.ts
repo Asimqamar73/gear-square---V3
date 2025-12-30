@@ -11,6 +11,7 @@ import { create_service_items_table } from "./tables/serviceItems.js";
 import { create_service_bill_table } from "./tables/serviceBill.js";
 import { create_vehicles_table } from "./tables/vehicles.js";
 import { create_service_labor_charges_table } from "./tables/serviceLaborCharges.js";
+import { create_labour_type_table } from "./tables/laborTypes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = path.dirname(__filename);
@@ -106,13 +107,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.log("Database connected successfully at:", dbPath);
 
     // ✅ ENABLE FOREIGN KEYS - Critical for ON DELETE CASCADE to work
-    db.run("PRAGMA foreign_keys = ON", (pragmaErr) => {
+    db.run("PRAGMA foreign_keys = ON", async (pragmaErr) => {
       if (pragmaErr) {
         console.error("Error enabling foreign keys:", pragmaErr.message);
       } else {
         console.log("Foreign keys enabled successfully");
         // Verify foreign keys are actually enabled
         verifyForeignKeys();
+
+        // 🔹 Run migrations here
+        try {
+          // const { runMigrations } = await import("./migrate.js");
+          // await runMigrations(db);
+          console.log("Migrations applied successfully");
+        } catch (migErr) {
+          console.error("Migration error:", migErr);
+        }
+
         // Initialize tables after enabling foreign keys
         initializeTables();
       }
@@ -132,6 +143,7 @@ function initializeTables() {
   create_service_table();
   create_service_items_table();
   create_service_bill_table();
+  create_labour_type_table();
   create_service_labor_charges_table();
   create_product_prices_view();
   // Add all your other table creation functions

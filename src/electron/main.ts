@@ -1,4 +1,3 @@
-import { createDeductProductQuantityTrigger } from "../assets/db/triggers/triggers.js";
 import {
   dailyDueAmount,
   dailyProfit,
@@ -18,7 +17,6 @@ import {
 } from "../assets/db/tables/dashboard.js";
 import {
   addCustomerToDB,
-  create_customers_table,
   deleteCustomerById,
   getAllCustomers,
   getCustomerById,
@@ -35,14 +33,12 @@ import {
   updateProductStock,
 } from "../assets/db/tables/products.js";
 import {
-  addServiceItems,
   create_service_items_table,
   getServiceItems,
   updateServiceByServiceId,
 } from "../assets/db/tables/serviceItems.js";
 import {
   create_service_table,
-  addService,
   getAllInvoices,
   getServiceDetails,
   getServicesById,
@@ -53,11 +49,13 @@ import {
 } from "../assets/db/tables/services.js";
 import { get_all_users, login, create_users_table } from "../assets/db/tables/users.js";
 import {
-  addServiceBill,
-  create_service_bill_table,
-  getServiceBill,
-  UpdateServiceBillPayment,
-} from "../assets/db/tables/serviceBill.js";
+  getAllLabourTypes,
+  getLabourTypeById,
+  insertLabourType,
+  searchLabourType,
+  updateLabourTypeDetails,
+} from "../assets/db/tables/laborTypes.js";
+import { getServiceBill, UpdateServiceBillPayment } from "../assets/db/tables/serviceBill.js";
 import { BrowserWindow, app, ipcMain } from "electron";
 import path from "path";
 import { isDev } from "./util.js";
@@ -65,7 +63,6 @@ import { getPreloadpath } from "./pathResolver.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import {
-  create_vehicles_table,
   deleteVehicleFromDatabase,
   getVehicleById,
   getVehiclesCustomerId,
@@ -94,10 +91,6 @@ app.on("ready", () => {
   }
   mainWindow.maximize();
 
-  // pollResources(mainWindow);
-  // ipcMain.handle("getStaticData",()=>{
-  //   return getStaticData ()
-  // })
   ipcMain.handle("db:login", async (ev, args) => {
     try {
       const response = await login({ username: args.username, password: args.password });
@@ -343,7 +336,6 @@ app.on("ready", () => {
         args.billStatus,
         args.subtotalExclVAT,
         args.total
-
       );
       return { success: true, invoiceId };
     } catch (error) {
@@ -353,7 +345,6 @@ app.on("ready", () => {
   });
 
   ipcMain.handle("db:update-invoice", async (event, args) => {
-
     try {
       const response: any = await updateServiceByServiceId(args);
       return { success: true, message: response };
@@ -785,5 +776,90 @@ ipcMain.handle("db:delete-vehicle-by-id", async (event, id) => {
   } catch (error) {
     //@ts-ignore
     return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle(
+  "db:add-labor-type",
+  async (
+    event,
+    {
+      title,
+      description,
+    }: {
+      title: string;
+      description: string;
+    }
+  ) => {
+    try {
+      // Save to SQLite
+      const response = await insertLabourType({
+        title,
+        description,
+      });
+
+      return { success: true, response };
+    } catch (error: any) {
+      console.error("Error while adding labor type", error);
+
+      return { success: false, error: error };
+    }
+  }
+);
+
+ipcMain.handle(
+  "db:update-labour-type-details",
+  async (
+    event,
+    {
+      title,
+      description,
+      id,
+    }: {
+      title: string;
+      description: string;
+      id: number;
+    }
+  ) => {
+    try {
+      // Save to SQLite
+      const response = await updateLabourTypeDetails({
+        title,
+        description,
+        id,
+      });
+      return { success: true, response };
+    } catch (error: any) {
+      console.error("Error while updating labour type", error);
+
+      return { success: false, error: error };
+    }
+  }
+);
+
+ipcMain.handle("db:get-all-labor-types", async (event, args) => {
+  try {
+    const { limit, offset } = args || {};
+    const response = await getAllLabourTypes(limit, offset);
+    return { success: true, response };
+  } catch (error) {
+    //@ts-ignore
+    return { success: false, error: error?.message || "Unknown error" };
+  }
+});
+
+
+ipcMain.handle("db:search-labor-type", async (event, {search}) => {
+  return await searchLabourType(search);
+});
+
+
+ipcMain.handle("db:get-labor-type-by-id", async (event, id) => {
+    try {
+    const response = await getLabourTypeById(id);
+    return { success: true, response };
+  } catch (error) {
+    //@ts-ignore
+    return { success: false, error: error?.message || "Unknown error" };
   }
 });

@@ -18,6 +18,9 @@ import EditCustomer from "../pages/customers/EditCustomer";
 import VehicleDetails from "../pages/vehicle/vehicleDetails";
 import { GenerateVehicleServiceInvoice } from "../pages/invoice/GenerateVehicleServiceInvoice";
 import { EditCustomerInvoice } from "../pages/invoice/EditCustomerInvoice";
+import AddLaborType from "../pages/labor-types/AddLaborType";
+import LaborTypes from "../pages/labor-types/LaborTypes";
+import EditLaborType from "../pages/labor-types/EditLaborType";
 
 function AppRoutes() {
   return (
@@ -51,7 +54,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/edit-product/:productId"
             element={
               <PrivateRoute>
@@ -59,7 +62,6 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/generate-invoice"
             element={
@@ -68,7 +70,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-             <Route
+          <Route
             path="/generate-invoice/:customerId"
             element={
               <PrivateRoute>
@@ -76,8 +78,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-
-            <Route
+          <Route
             path="/generate-service-invoice/:vehicleId"
             element={
               <PrivateRoute>
@@ -101,7 +102,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/edit-invoice/:invoiceId"
             element={
               <PrivateRoute>
@@ -125,7 +126,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/edit-customer/:id"
             element={
               <PrivateRoute>
@@ -133,7 +134,7 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/customer-details/:customerId"
             element={
               <PrivateRoute>
@@ -142,11 +143,35 @@ function AppRoutes() {
             }
           />
           // Vehicle details
-             <Route
+          <Route
             path="/vehicle-details/:vehicleId"
             element={
               <PrivateRoute>
                 <VehicleDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/labor-types/add"
+            element={
+              <PrivateRoute>
+                <AddLaborType />
+              </PrivateRoute>
+            }
+          />
+            <Route
+            path="/labor-types/list"
+            element={
+              <PrivateRoute>
+                <LaborTypes />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/labor-types/edit/:id"
+            element={
+              <PrivateRoute>
+                <EditLaborType />
               </PrivateRoute>
             }
           />

@@ -11,7 +11,7 @@ export const create_vehicles_table = () => {
       make TEXT,
       model TEXT,
       chassis_number TEXT,
-      year INTEGER CHECK(year >= 1900 AND year <= 2100),
+      year INTEGER,
       customer_id INTEGER NOT NULL,
       created_at TEXT DEFAULT (datetime('now','localtime')),
       created_by INTEGER,

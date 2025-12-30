@@ -322,7 +322,7 @@ export function generateInvoice(
             let labourCostTotalExclVat = 0;
             if (laborItems && laborItems.length) {
               const insertLabourQuery = `
-                INSERT INTO labour_charges (service_id, title, description, subtotal_excl_vat, subtotal_incl_vat, vat_amount)
+                INSERT INTO labour_charges (service_id, labour_type_id, description, subtotal_excl_vat, subtotal_incl_vat, vat_amount)
                 VALUES (?, ?, ?, ?, ?, ?)
               `;
               const labourStmt = db.prepare(insertLabourQuery);
@@ -330,7 +330,7 @@ export function generateInvoice(
               for (const labour of laborItems) {
                 const amountExclVat = Number(labour.exclVatTotal) || 0;
                 labourCostTotalExclVat += amountExclVat;
-                labourStmt.run([service_id, labour.title, labour.description, labour.exclVatTotal, labour.inclVatTotal, labour.vat]);
+                labourStmt.run([service_id, labour.labourType.id, labour.description, labour.exclVatTotal, labour.inclVatTotal, labour.vat]);
               }
 
               labourStmt.finalize((errLabour: any) => {

@@ -118,7 +118,7 @@ const InvoiceDetailsPage = () => {
     addTRN: false,
     addPaymentDetails: false,
   });
-
+``
   useEffect(() => {
     fetchDetails(params.invoiceId);
   }, [params.invoiceId]);

@@ -11,14 +11,15 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:react dev:electron ",
     "dev:react": "vite",
-    "dev:electron": "npm run transpile:electron && cross-env NODE_ENV=development electron .",
+    "dev:electron": "npm run transpile:electron && npm run copy-migrations && cross-env NODE_ENV=development electron .",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "transpile:electron": "tsc --project src/electron/tsconfig.json",
     "dist:mac": "npm run transpile:electron && npm run build && electron-builder --mac --arm64",
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64",
-    "dist:win": "npm run transpile:electron && npm run build && electron-builder --win --x64 "
+    "dist:win": "npm run transpile:electron && npm run build && electron-builder --win --x64 ",
+    "copy-migrations": "cpx \"src/assets/db/migrations/**/*\" \"dist-electron/assets/db/migrations\""
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.14",

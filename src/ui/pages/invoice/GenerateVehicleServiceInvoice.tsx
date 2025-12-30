@@ -31,9 +31,11 @@ interface InvoiceItem {
   costPrice: number;
 }
 interface LaborItem {
-  title: string;
+  labourType: any; // stores the selected labour type object
   description: string;
-  inclVatTotal: string;
+  inclVatTotal: number;
+  exclVatTotal: number;
+  vat: number;
 }
 
 interface VehicleInfo {
@@ -70,6 +72,7 @@ export const GenerateVehicleServiceInvoice = () => {
   };
 
   const [products, setProducts] = useState([]);
+  const [laborTypes, setLaborTypes] = useState([]);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
   const [serviceNote, setServiceNote] = useState("");
   const [totalBill, setTotalBill] = useState(0);
@@ -86,9 +89,11 @@ export const GenerateVehicleServiceInvoice = () => {
   const [laborItemsTotalVat, setLaborItemsTotalVat] = useState(0);
 
   useEffect(() => {
-    Promise.allSettled([fetchAllProducts(), fetchVehicleInformation()]).finally(() =>
-      setLoading(false)
-    );
+    Promise.allSettled([
+      fetchAllProducts(),
+      fetchAllLaborTypes(),
+      fetchVehicleInformation(),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const fetchAllProducts = async () => {
@@ -96,6 +101,18 @@ export const GenerateVehicleServiceInvoice = () => {
       //@ts-ignore
       const { data } = await window.electron.getProducts();
       setProducts(data || []);
+    } catch (error) {
+      toast.error("Failed to load products. Please try again.", {
+        position: "top-center",
+      });
+    }
+  };
+
+  const fetchAllLaborTypes = async () => {
+    try {
+      //@ts-ignore
+      const { response } = await window.electron.getAllLaborTypes();
+      setLaborTypes(response.data || []);
     } catch (error) {
       toast.error("Failed to load products. Please try again.", {
         position: "top-center",
@@ -181,6 +198,7 @@ export const GenerateVehicleServiceInvoice = () => {
     const laborCostExclVat = calculateAmountExVat(Number(laborCost));
     const subtotal = totalBill + laborCostExclVat;
     const vatTotal = totalVat + laborItemsTotalVat;
+
     const afterVat = Number(subtotal) + vatTotal;
 
     const validDiscount = Number(discount) || 0;
@@ -192,11 +210,11 @@ export const GenerateVehicleServiceInvoice = () => {
       totalVat,
       laborItemsTotalVat,
       laborCostExclVat,
-      vatTotal,
+      vatTotal: round2(vatTotal),
       subtotal,
-      afterVat,
+      afterVat: round2(afterVat),
       validDiscount,
-      total,
+      total : round2(total),
       validPaidAmount,
       remaining,
     };
@@ -206,9 +224,7 @@ export const GenerateVehicleServiceInvoice = () => {
     // Check if both items and labor items are empty or not added
     const hasNoItems = items.length === 0 || items.every((item) => item.product === null);
     const hasNoLaborItems =
-      laborItems.length === 0 ||
-      //@ts-ignore
-      laborItems.every((labor) => !labor.labour_type || labor.labour_type.trim() === "");
+      laborItems.length === 0 || laborItems.every((labor) => !labor.labourType);
 
     if (hasNoItems && hasNoLaborItems) {
       toast.error("Please add at least one service item or labor item", {
@@ -224,12 +240,11 @@ export const GenerateVehicleServiceInvoice = () => {
       });
       return;
     }
-
     // Check if labor items exist but are empty/invalid
     //@ts-ignore
     if (
       laborItems.length > 0 &&
-      laborItems.every((labor) => !labor.title || labor.title.trim() === "" || !labor.inclVatTotal)
+      laborItems.every((labor) => labor.labourType === null || !labor.inclVatTotal)
     ) {
       toast.error("Please complete the labor item details or remove empty labor items", {
         position: "top-center",
@@ -242,7 +257,7 @@ export const GenerateVehicleServiceInvoice = () => {
       //@ts-ignore
       const userId = JSON.parse(localStorage.getItem("gear-square-user")).id;
       const totals = calculateTotals();
-      console.log("Items ==>", items);
+
       // @ts-ignore
       const response = await window.electron.generateInvoice({
         items,
@@ -265,6 +280,7 @@ export const GenerateVehicleServiceInvoice = () => {
 
       // Fixed: Check response properly
       if (response && response.invoiceId) {
+      // if (true) {
         toast.success("Invoice generated successfully", {
           position: "top-center",
         });
@@ -510,6 +526,7 @@ export const GenerateVehicleServiceInvoice = () => {
             setTotalLaborCost={setLaborCost}
             deleteLaborItem={deleteLaborItem}
             setLaborItemsTotalVat={setLaborItemsTotalVat}
+            labourTypes={laborTypes}
           />
         </div>
 

@@ -22,7 +22,7 @@ const InvoiceItem = ({
   items,
   addNewItem,
   deleteItem,
-  totalProductsAmount
+  totalProductsAmount,
 }: any) => {
   return (
     <div className="p-4 bg-white rounded-2xl flex flex-col gap-4 border  border-gray-300 shadow-sm">
@@ -33,7 +33,7 @@ const InvoiceItem = ({
             <label htmlFor="name" className="text-sm text-gray-500">
               Name
             </label>
-
+            {/* 
             <Combobox
               data={products.filter(
                 (p: any) =>
@@ -46,6 +46,20 @@ const InvoiceItem = ({
               handleProductChange={handleProductChange}
               item={item}
               itemIdx={idx}
+            /> */}
+            <Combobox
+              data={products.filter(
+                (p: any) =>
+                  // show product only if it's not selected in other items OR it's the current item's product
+                  !items.some((i: any) => i.product?.id === p.id && i !== item)
+              )}
+              emptyMessage="No product found"
+              placeholder="Search product"
+              value={item.product?.id || ""}
+              handleProductChange={handleProductChange}
+              item={item}
+              itemIdx={idx}
+              // type="product" is default, no need to specify
             />
           </div>
           <div className="flex flex-col gap-1 grow">
@@ -186,9 +200,9 @@ const InvoiceItem = ({
         Add item
       </Button>
       <div className="text-right font-semibold text-gray-800">
-                <span>Total cost: </span>
-              AED {totalProductsAmount}
-            </div>
+        <span>Total cost: </span>
+        AED {totalProductsAmount}
+      </div>
     </div>
   );
 };
