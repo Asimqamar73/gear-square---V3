@@ -371,19 +371,19 @@ export function generateInvoice(
               });
             } else {
               // If no labour items, proceed normally
-              const billSubtotal = itemsSubtotal + vehicleDetails.laborCost;
-              const totalBeforeDiscount = Number(billSubtotal) + Number(vatAmount);
-              const discountAmount = discountPercent ? discountPercent : 0;
-              const total = totalBeforeDiscount - discountAmount;
+              // const billSubtotal = itemsSubtotal + vehicleDetails.laborCost;
+              // const totalBeforeDiscount = Number(billSubtotal) + Number(vatAmount);
+              // const discountAmount = discountPercent ? discountPercent : 0;
+              // const total = totalBeforeDiscount - discountAmount;
 
               const insertBillQuery = `
                 INSERT INTO service_bill
-                (service_id, subtotal, discount, vat_amount, total, amount_paid, bill_status)
+                (service_id, subtotal_excl_vat, discount, vat_amount, total, amount_paid, bill_status)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `;
               db.run(
                 insertBillQuery,
-                [service_id, billSubtotal, discountPercent, vatAmount, total, amountPaid, billStatus],
+                [service_id, subtotalExclVAT, discountPercent, vatAmount, total, amountPaid, billStatus],
                 function (err3: any) {
                   if (err3) {
                     db.run("ROLLBACK");
