@@ -143,7 +143,7 @@ const CustomerDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" >
       <div className="py-6 px-6 max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="mb-6">

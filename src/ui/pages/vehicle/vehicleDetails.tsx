@@ -96,7 +96,7 @@ const VehicleDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="py-8 px-8 max-w-[1400px] mx-auto">
         {/* Enhanced Header */}
         <div className="mb-8">

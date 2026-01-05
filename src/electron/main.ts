@@ -369,24 +369,50 @@ app.on("ready", () => {
     return await UpdateServiceBillPayment(amountPaid, billStatus, id);
   });
 
+  // ipcMain.handle("db:get-invoices", async (event, args) => {
+  //   try {
+  //     const { limit, offset, search, bill_status } = args;
+
+  //     const response = await getAllInvoices(limit, offset, search, bill_status);
+
+  //     return {
+  //       success: true,
+  //       response,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       //@ts-ignore
+  //       error: error.message,
+  //     };
+  //   }
+  // });
+
   ipcMain.handle("db:get-invoices", async (event, args) => {
-    try {
-      const { limit, offset, search, bill_status } = args;
+  try {
+    const { limit, offset, search, bill_status, date } = args;
 
-      const response = await getAllInvoices(limit, offset, search, bill_status);
+    const response = await getAllInvoices(
+      limit,
+      offset,
+      search,
+      bill_status,
+      date
+    );
 
-      return {
-        success: true,
-        response,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        //@ts-ignore
-        error: error.message,
-      };
-    }
-  });
+    return {
+      success: true,
+      response,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      //@ts-ignore
+      error: error.message,
+    };
+  }
+});
+
 
   ipcMain.handle("db:get-services-by-id", async (event, customerId) => {
     try {

@@ -4,14 +4,14 @@ import Home from "../pages/Home";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import Products from "../pages/product/Products";
 import Layout from "../layouts/AppLayout";
-import { GenerateInvoice } from "../pages/invoice/GenerateInvoice";
+// import { GenerateInvoice } from "../pages/invoice/GenerateInvoice";
 import Invoices from "../pages/invoice/Invoices";
 import InvoiceDetails from "../pages/invoice/InvoiceDetails";
 import PrivateRoute from "./PrivateRoute";
 import Customers from "../pages/customers/Customers";
 import Dashboard from "../pages/dashboard/Dashboard";
 import AddCustomer from "../pages/customers/AddCustomer";
-import { GenerateCustomerInvoive } from "../pages/invoice/GenerateCustomerInvoive";
+// import { GenerateCustomerInvoive } from "../pages/invoice/GenerateCustomerInvoive";
 import CusomerDetails from "../pages/customers/CustomerDetails";
 import EditProduct from "../pages/product/EditProduct";
 import EditCustomer from "../pages/customers/EditCustomer";
@@ -21,6 +21,7 @@ import { EditCustomerInvoice } from "../pages/invoice/EditCustomerInvoice";
 import AddLaborType from "../pages/labor-types/AddLaborType";
 import LaborTypes from "../pages/labor-types/LaborTypes";
 import EditLaborType from "../pages/labor-types/EditLaborType";
+import Dashboard2 from "../pages/dashboard/Dashboard2";
 
 function AppRoutes() {
   return (
@@ -35,6 +36,14 @@ function AppRoutes() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+            <Route
+            path="/dashboard2"
+            element={
+              <PrivateRoute>
+                <Dashboard2 />
               </PrivateRoute>
             }
           />
@@ -62,22 +71,22 @@ function AppRoutes() {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/generate-invoice"
             element={
               <PrivateRoute>
                 <GenerateInvoice />
               </PrivateRoute>
             }
-          />
-          <Route
+          /> */}
+          {/* <Route
             path="/generate-invoice/:customerId"
             element={
               <PrivateRoute>
                 <GenerateCustomerInvoive />
               </PrivateRoute>
             }
-          />
+          /> */}
           <Route
             path="/generate-service-invoice/:vehicleId"
             element={

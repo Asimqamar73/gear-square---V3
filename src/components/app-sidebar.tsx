@@ -50,6 +50,11 @@ const menuItems: MenuSection[] = [
         url: "/dashboard",
         icon: LayoutDashboard,
       },
+      // {
+      //   title: "Dashboard2",
+      //   url: "/dashboard2",
+      //   icon: LayoutDashboard,
+      // },
     ],
   },
   {

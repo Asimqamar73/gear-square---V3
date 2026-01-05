@@ -574,24 +574,6 @@ export const EditCustomerInvoice = () => {
       const itemChanges = detectItemChanges();
       const laborChanges = detectLaborChanges();
       const totals = calculateTotals();
-console.log({
-        service_id: params.invoiceId,
-        items_changes: itemChanges,
-        labor_changes: laborChanges,
-        items,
-        labor_item: laborItems,
-        total: totals.total,
-        subtotal: totals.subtotal,
-        vat_amount: totals.vatTotal,
-        discount_percentage: totals.validDiscount,
-        discount_amount: totals.validDiscount,
-        amount_paid: totals.validPaidAmount,
-        labor_cost: calculateRetailExVat(Number(laborCost)),
-        service_note: serviceNote,
-        payment_status: updatePaymentStatus(totals.validPaidAmount, totals.total),
-        //@ts-ignore
-        updated_by: JSON.parse(localStorage.getItem("gear-square-user")).id,
-      })
       // @ts-ignore
       const response = await window.electron.updateInvoice({
         service_id: params.invoiceId,
@@ -645,10 +627,10 @@ console.log({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="py-16 px-8">
-        <div className="flex flex-col gap-2 mb-8">
-          <PageHeader title="Edit invoice">
+    <div className="min-h-screen">
+      <div className="py-8 px-6 max-w-[1400px] mx-auto">
+        <div className="flex flex-col gap-2 mb-2">
+          <PageHeader title="Edit invoice" subtitle={`Update service invoice for ${customerInfo?.vehicle_number}`}>
             <button
               onClick={() => setOpen(true)}
               disabled={isSubmitting}
@@ -677,7 +659,7 @@ console.log({
 
           <div className="grid lg:grid-cols-3 gap-6 mb-6">
             {/* Owner Details */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-gray-100">
                 <User className="w-5 h-5 text-gray-600" />
                 <h2 className="text-base font-semibold text-gray-900">Owner Details</h2>

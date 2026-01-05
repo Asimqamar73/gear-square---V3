@@ -25,12 +25,12 @@ const InvoiceItem = ({
   totalProductsAmount,
 }: any) => {
   return (
-    <div className="p-4 bg-white rounded-2xl flex flex-col gap-4 border  border-gray-300 shadow-sm">
+    <div className="p-4 bg-white rounded-xl flex flex-col gap-4 border  border-gray-300 shadow-sm">
       <h2 className="text-xl font-semibold text-gray-800">Service items</h2>
       {items.map((item: any, idx: number) => (
         <div className="flex items-end gap-4" key={idx}>
           <div className="flex flex-col gap-1 w-full">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm text-gray-500 font-medium">
               Name
             </label>
             {/* 
@@ -63,7 +63,7 @@ const InvoiceItem = ({
             />
           </div>
           <div className="flex flex-col gap-1 grow">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm font-medium text-gray-500">
               Unit price
             </label>
             <input
@@ -79,7 +79,7 @@ const InvoiceItem = ({
             />
           </div>
           <div className="flex flex-col justify-center gap-1 grow relative">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm font-medium text-gray-500">
               Quantity
             </label>
 
@@ -98,7 +98,7 @@ const InvoiceItem = ({
           </div>
 
           <div className="flex flex-col gap-1 grow">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm font-medium text-gray-500">
               Subtotal
             </label>
             <input
@@ -115,7 +115,7 @@ const InvoiceItem = ({
             />
           </div>
           <div className="flex flex-col gap-1 grow">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm font-medium text-gray-500">
               VAT
             </label>
             <input
@@ -130,7 +130,7 @@ const InvoiceItem = ({
             />
           </div>
           <div className="flex flex-col gap-1 grow">
-            <label htmlFor="name" className="text-sm text-gray-500">
+            <label htmlFor="name" className="text-sm font-medium text-gray-500">
               Amount (incl vat)
             </label>
             <input

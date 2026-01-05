@@ -23,8 +23,7 @@ export const create_service_table = () => {
       }
     }
   );
-    create_services_triggers();
-  
+  create_services_triggers();
 };
 
 export function addService(data: any) {
@@ -46,34 +45,121 @@ export function addService(data: any) {
 export function deleteService(serviceId: number) {
   return new Promise((resolve, reject) => {
     const query = `DELETE FROM services WHERE id = ?`;
-    
+
     db.run(query, [serviceId], function (err: any) {
       if (err) {
         console.error("Error deleting service:", err.message);
         return reject(err);
       }
-      
+
       // this.changes tells us how many rows were affected
       if (this.changes === 0) {
         console.warn(`Service with ID ${serviceId} not found`);
       } else {
         console.log(`Service ${serviceId} deleted successfully (${this.changes} row(s) affected)`);
       }
-      
+
       resolve(this.changes);
     });
   });
 }
 
+// export function getAllInvoices(
+//   limit: number,
+//   offset: number,
+//   search: string = "",
+//   bill_status: number | null = null
+// ) {
+//   return new Promise((resolve, reject) => {
+//     const conditions: string[] = [];
+//     const params: any[] = [];
 
+//     // 🔍 SEARCH FILTER
+//     if (search && search.trim() !== "") {
+//       const like = `%${search}%`;
+//       conditions.push(`
+//         (
+//           customers.name LIKE ? OR
+//           customers.phone_number LIKE ? OR
+//           customers.company_name LIKE ? OR
+//           vehicles.vehicle_number LIKE ? OR
+//           vehicles.chassis_number LIKE ? OR
+//           services.id LIKE ?
+//         )
+//       `);
+//       params.push(like, like, like, like, like, like);
+//     }
 
+//     // 🧾 BILL STATUS FILTER (Tabs)
+//     if (bill_status !== null && bill_status !== undefined) {
+//       conditions.push(`service_bill.bill_status = ?`);
+//       params.push(bill_status);
+//     }
 
+//     // Build WHERE clause safely
+//     const whereClause =
+//       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+//     const baseQuery = `
+//       FROM services
+//       JOIN vehicles ON vehicles.id = services.vehicle_id
+//       JOIN customers ON customers.id = vehicles.customer_id
+//       JOIN service_bill ON service_bill.service_id = services.id
+//       ${whereClause}
+//     `;
+
+//     // 📄 DATA QUERY
+//     const query = `
+//       SELECT
+//         services.id AS invoice_id,
+//         services.created_at,
+//         vehicles.vehicle_number,
+//         vehicles.chassis_number,
+//         vehicles.id AS vehicle_id,
+//         customers.name,
+//         customers.phone_number,
+//         customers.company_name,
+//         customers.company_phone_number,
+//         service_bill.amount_paid,
+//         service_bill.amount_due,
+//         service_bill.total,
+//         service_bill.bill_status
+//       ${baseQuery}
+//       ORDER BY services.id DESC
+//       LIMIT ? OFFSET ?
+//     `;
+
+//     // ➕ pagination params
+//     const dataParams = [...params, limit, offset];
+
+//     // 🔢 COUNT QUERY
+//     const countQuery = `
+//       SELECT COUNT(*) AS total
+//       ${baseQuery}
+//     `;
+
+//     // 1️⃣ Get total count
+//     db.get(countQuery, params, (countErr: any, countRow: any) => {
+//       if (countErr) return reject(countErr);
+
+//       const total = countRow?.total ?? 0;
+
+//       // 2️⃣ Get rows
+//       db.all(query, dataParams, (err: any, rows: any[]) => {
+//         if (err) return reject(err);
+
+//         resolve({ rows, total });
+//       });
+//     });
+//   });
+// }
 
 export function getAllInvoices(
   limit: number,
   offset: number,
   search: string = "",
-  bill_status: number | null = null
+  bill_status: number | null = null,
+  date?: string // <-- new optional param, format: "YYYY-MM-DD"
 ) {
   return new Promise((resolve, reject) => {
     const conditions: string[] = [];
@@ -101,9 +187,14 @@ export function getAllInvoices(
       params.push(bill_status);
     }
 
+    // 📅 DATE FILTER
+    if (date) {
+      conditions.push(`DATE(services.created_at) = DATE(?)`);
+      params.push(date);
+    }
+
     // Build WHERE clause safely
-    const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const baseQuery = `
       FROM services 
@@ -112,7 +203,6 @@ export function getAllInvoices(
       JOIN service_bill ON service_bill.service_id = services.id
       ${whereClause}
     `;
-
     // 📄 DATA QUERY
     const query = `
       SELECT
@@ -133,8 +223,6 @@ export function getAllInvoices(
       ORDER BY services.id DESC
       LIMIT ? OFFSET ?
     `;
-
-    // ➕ pagination params
     const dataParams = [...params, limit, offset];
 
     // 🔢 COUNT QUERY
@@ -158,8 +246,6 @@ export function getAllInvoices(
     });
   });
 }
-
-
 
 export async function getServicesById(customerId: number) {
   try {
@@ -261,8 +347,6 @@ export async function getServiceDetails(id: number) {
   }
 }
 
-
-
 export function generateInvoice(
   vehicleDetails: any,
   items: any[],
@@ -309,7 +393,16 @@ export function generateInvoice(
 
           for (const item of items) {
             itemsSubtotal += item.subtotal;
-            stmt.run([item.product.id, service_id, item.quantity, item.subtotal, item.inclVatTotal, item.itemVatTotal, item.unitPriceInclVAT, item.costPrice]);
+            stmt.run([
+              item.product.id,
+              service_id,
+              item.quantity,
+              item.subtotal,
+              item.inclVatTotal,
+              item.itemVatTotal,
+              item.unitPriceInclVAT,
+              item.costPrice,
+            ]);
           }
 
           stmt.finalize((err2: any) => {
@@ -330,7 +423,14 @@ export function generateInvoice(
               for (const labour of laborItems) {
                 const amountExclVat = Number(labour.exclVatTotal) || 0;
                 labourCostTotalExclVat += amountExclVat;
-                labourStmt.run([service_id, labour.labourType.id, labour.description, labour.exclVatTotal, labour.inclVatTotal, labour.vat]);
+                labourStmt.run([
+                  service_id,
+                  labour.labourType.id,
+                  labour.description,
+                  labour.exclVatTotal,
+                  labour.inclVatTotal,
+                  labour.vat,
+                ]);
               }
 
               labourStmt.finalize((errLabour: any) => {
@@ -355,7 +455,15 @@ export function generateInvoice(
                 `;
                 db.run(
                   insertBillQuery,
-                  [service_id, subtotalExclVAT, discountPercent, vatAmount, total, amountPaid, billStatus],
+                  [
+                    service_id,
+                    subtotalExclVAT,
+                    discountPercent,
+                    vatAmount,
+                    total,
+                    amountPaid,
+                    billStatus,
+                  ],
                   function (err3: any) {
                     if (err3) {
                       db.run("ROLLBACK");
@@ -383,7 +491,15 @@ export function generateInvoice(
               `;
               db.run(
                 insertBillQuery,
-                [service_id, subtotalExclVAT, discountPercent, vatAmount, total, amountPaid, billStatus],
+                [
+                  service_id,
+                  subtotalExclVAT,
+                  discountPercent,
+                  vatAmount,
+                  total,
+                  amountPaid,
+                  billStatus,
+                ],
                 function (err3: any) {
                   if (err3) {
                     db.run("ROLLBACK");

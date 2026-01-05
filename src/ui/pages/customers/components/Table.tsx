@@ -176,7 +176,7 @@ const CustomerTable = ({ data, onView, onEdit, onDelete }: CustomerTableProps) =
                           </button>
                           {hoveredTooltip === `edit-${customer.id}` && (
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-10">
-                              Edit customer
+                              Edit
                             </div>
                           )}
                         </div>
@@ -193,7 +193,7 @@ const CustomerTable = ({ data, onView, onEdit, onDelete }: CustomerTableProps) =
                           </button>
                           {hoveredTooltip === `delete-${customer.id}` && (
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-10">
-                              Delete customer
+                              Delete
                             </div>
                           )}
                         </div>

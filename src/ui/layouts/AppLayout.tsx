@@ -4,6 +4,8 @@ import { Outlet } from "react-router-dom"
 
 export default function Layout() {
   return (
+    <div className="bg-gray-50">
+
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full">
@@ -11,5 +13,6 @@ export default function Layout() {
         <Outlet />
       </main>
     </SidebarProvider>
+    </div>
   )
 }

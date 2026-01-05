@@ -130,13 +130,13 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="justify-between h-11 border rounded-sm p-2 bg-teal-50/30 border-gray-400"
+          className="justify-between h-11 border rounded-sm p-2 bg-gray-50 border-gray-400"
         >
           {displayText}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 bg-gray-100 border-gray-400 min-w-96">
+      <PopoverContent className="p-0 bg-amber-50 border-gray-400" align="start">
         <Command>
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>

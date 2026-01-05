@@ -39,7 +39,7 @@ const InvoiceTable = ({ data, onViewInvoice }: InvoiceTableProps) => {
             <caption className="py-8 text-center">
               <FileText className="w-12 h-12 mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500 font-medium">No invoices found</p>
-              <p className="text-gray-400 text-sm mt-1">Invoices will appear here once created</p>
+              <p className="text-gray-400 text-sm mt-1">Invoices will appear here.</p>
             </caption>
           )}
 
